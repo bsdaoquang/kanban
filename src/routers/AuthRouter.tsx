@@ -24,7 +24,7 @@ const AuthRouter = () => {
 						/>
 					</div>
 					<div>
-						<Title>KANBAN</Title>
+						<Title className='text-primary'>KANBAN</Title>
 					</div>
 				</div>
 
