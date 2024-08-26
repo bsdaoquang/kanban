@@ -1,24 +1,19 @@
 /** @format */
 
-import {
-	Button,
-	Card,
-	Checkbox,
-	Form,
-	Input,
-	message,
-	Space,
-	Typography,
-} from 'antd';
-import React, { useState } from 'react';
+import { Button, Card, Form, Input, message, Space, Typography } from 'antd';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import SocialLogin from './components/SocialLogin';
 import handleAPI from '../../apis/handleAPI';
+import SocialLogin from './components/SocialLogin';
+import { localDataNames } from '../../constants/appInfos';
+import { addAuth } from '../../redux/reducers/authReducer';
 
 const { Title, Text, Paragraph } = Typography;
 const SignUp = () => {
 	const [isLoading, setIsLoading] = useState(false);
-	const [isRemember, setIsRemember] = useState(false);
+
+	const dispatch = useDispatch();
 
 	const [form] = Form.useForm();
 
@@ -27,8 +22,11 @@ const SignUp = () => {
 
 		setIsLoading(true);
 		try {
-			const res = await handleAPI(api, values, 'post');
-			console.log(res);
+			const res: any = await handleAPI(api, values, 'post');
+			if (res.data) {
+				message.success(res.message);
+				dispatch(addAuth(res.data));
+			}
 		} catch (error: any) {
 			console.log(error);
 			message.error(error.message);
