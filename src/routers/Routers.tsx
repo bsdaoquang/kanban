@@ -3,11 +3,14 @@
 import React from 'react';
 import AuthRouter from './AuthRouter';
 import MainRouter from './MainRouter';
+import { useDispatch, useSelector } from 'react-redux';
+import { authSeletor, AuthState } from '../redux/reducers/authReducer';
 
 const Routers = () => {
-	// check login
+	const auth: AuthState = useSelector(authSeletor);
+	const dispatch = useDispatch();
 
-	return 1 < 2 ? <AuthRouter /> : <MainRouter />;
+	return !auth.token ? <AuthRouter /> : <MainRouter />;
 };
 
 export default Routers;
