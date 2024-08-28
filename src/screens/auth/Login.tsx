@@ -10,12 +10,13 @@ import {
 	Space,
 	Typography,
 } from 'antd';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import SocialLogin from './components/SocialLogin';
-import handleAPI from '../../apis/handleAPI';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+import handleAPI from '../../apis/handleAPI';
+import { localDataNames } from '../../constants/appInfos';
 import { addAuth } from '../../redux/reducers/authReducer';
+import SocialLogin from './components/SocialLogin';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -27,14 +28,20 @@ const Login = () => {
 	const dispatch = useDispatch();
 
 	const handleLogin = async (values: { email: string; password: string }) => {
+		setIsLoading(true);
 		try {
 			const res: any = await handleAPI('/auth/login', values, 'post');
 
 			message.success(res.message);
 			res.data && dispatch(addAuth(res.data));
+
+			if (isRemember) {
+				localStorage.setItem(localDataNames.authData, JSON.stringify(res.data));
+			}
 		} catch (error: any) {
 			message.error(error.message);
-			console.log(error.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -107,6 +114,7 @@ const Login = () => {
 
 				<div className='mt-4 mb-3'>
 					<Button
+						loading={isLoading}
 						onClick={() => form.submit()}
 						type='primary'
 						style={{
@@ -116,7 +124,7 @@ const Login = () => {
 						Login
 					</Button>
 				</div>
-				<SocialLogin />
+				<SocialLogin isRemember={isRemember} />
 				<div className='mt-3 text-center'>
 					<Space>
 						<Text>Don't have an acount? </Text>

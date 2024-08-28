@@ -1,7 +1,6 @@
 /** @format */
 
 import { Button } from 'antd';
-import React from 'react';
 import { useDispatch } from 'react-redux';
 import { removeAuth } from '../redux/reducers/authReducer';
 
