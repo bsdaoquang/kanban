@@ -13,9 +13,9 @@ import {
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import handleAPI from '../../apis/handleAPI';
-import { localDataNames } from '../../constants/appInfos';
-import { addAuth } from '../../redux/reducers/authReducer';
+import handleAPI from '@/apis/handleAPI';
+import { addAuth } from '@/redux/reducers/authReducer';
+import { localDataNames } from '@/constants/appInfos';
 import SocialLogin from './components/SocialLogin';
 
 const { Title, Paragraph, Text } = Typography;
