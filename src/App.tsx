@@ -6,8 +6,6 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 import './App.css';
 
-console.log(process.env.APP_ID);
-
 message.config({
 	top: 30,
 	duration: 2,

@@ -13,10 +13,10 @@ import {
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import handleAPI from '@/apis/handleAPI';
-import { addAuth } from '@/redux/reducers/authReducer';
-import { localDataNames } from '@/constants/appInfos';
 import SocialLogin from './components/SocialLogin';
+import handleAPI from '../../apis/handleAPI';
+import { addAuth } from '../../redux/reducers/authReducer';
+import { appInfo, localDataNames } from '../../constants/appInfos';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -54,9 +54,7 @@ const Login = () => {
 				<div className='text-center'>
 					<img
 						className='mb-3'
-						src={
-							'https://firebasestorage.googleapis.com/v0/b/kanban-c0323.appspot.com/o/kanban-logo.png?alt=media&token=a3e8c386-57da-49a3-b9a2-94b8fd93ff83'
-						}
+						src={appInfo.logo}
 						alt=''
 						style={{
 							width: 48,
