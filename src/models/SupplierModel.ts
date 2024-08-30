@@ -11,5 +11,7 @@ export interface SupplierModel {
 	photoUrl: string;
 	createdAt: string;
 	updatedAt: string;
+	email: string;
+	active: string;
 	_id: string;
 }
