@@ -17,6 +17,7 @@ import { colors } from '../constants/colors';
 import { SupplierModel } from '../models/SupplierModel';
 import { replaceName } from '../utils/replaceName';
 import { uploadFile } from '../utils/uploadFile';
+import { demodata } from '../data/demodata';
 
 const { Paragraph } = Typography;
 
