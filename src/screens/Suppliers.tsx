@@ -130,7 +130,7 @@ const Suppliers = () => {
 		try {
 			await handleAPI(`/supplier/remove?id=${id}`, undefined, 'delete');
 
-			getSuppliers();
+			await getSuppliers();
 		} catch (error) {
 			console.log(error);
 		}
