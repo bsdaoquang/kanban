@@ -3,6 +3,7 @@
 import { Button } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { authSeletor, removeAuth } from '../redux/reducers/authReducer';
+import { Resizable } from 're-resizable';
 
 const HomeScreen = () => {
 	const dispatch = useDispatch();

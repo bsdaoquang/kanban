@@ -1,6 +1,6 @@
 /** @format */
 
-import { Button, message, Modal, Space, Table, Typography } from 'antd';
+import { Button, Empty, message, Modal, Space, Table, Typography } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { Edit2, Sort, UserRemove } from 'iconsax-react';
 import { useEffect, useState } from 'react';
@@ -8,6 +8,9 @@ import handleAPI from '../apis/handleAPI';
 import { colors } from '../constants/colors';
 import { ToogleSupplier } from '../modals';
 import { SupplierModel } from '../models/SupplierModel';
+import { FormModel } from '../models/FormModel';
+import TableComponet from '../components/TableComponent';
+import { useNavigate, useRoutes, useSearchParams } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
@@ -20,86 +23,33 @@ const Suppliers = () => {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [total, setTotal] = useState<number>(10);
+	const [forms, setForms] = useState<FormModel>();
 
-	const columns: ColumnProps<SupplierModel>[] = [
-		{
-			key: 'index',
-			dataIndex: 'index',
-			title: '#',
-			align: 'center',
-		},
-		{
-			key: 'name',
-			dataIndex: 'name',
-			title: 'Supplirer name',
-		},
-		{
-			key: 'product',
-			dataIndex: 'product',
-			title: 'Product',
-		},
-		{
-			key: 'contact',
-			dataIndex: 'contact',
-			title: 'Contact',
-		},
-		{
-			key: 'email',
-			dataIndex: 'email',
-			title: 'Email',
-		},
-		{
-			key: 'type',
-			dataIndex: 'isTaking',
-			title: 'Type',
-			render: (isTaking: boolean) => (
-				<Text type={isTaking ? 'success' : 'danger'}>
-					{isTaking ? 'Taking Return' : 'Not Taking Return'}
-				</Text>
-			),
-		},
-		{
-			key: 'on',
-			dataIndex: 'active',
-			title: 'On the way',
-			render: (num) => num ?? '-',
-		},
-		{
-			key: 'buttonContainer',
-			title: 'Actions',
-			dataIndex: '',
-			render: (item: SupplierModel) => (
-				<Space>
-					<Button
-						type='text'
-						onClick={() => {
-							setSupplierSelected(item);
-							setIsVisibleModalAddNew(true);
-						}}
-						icon={<Edit2 size={18} className='text-info' />}
-					/>
-
-					<Button
-						onClick={() =>
-							confirm({
-								title: 'Comfirm',
-								content: 'Are you sure you want to remove this supplier?',
-								onOk: () => removeSuppiler(item._id),
-							})
-						}
-						type='text'
-						icon={<UserRemove size={18} className='text-danger' />}
-					/>
-				</Space>
-			),
-			fixed: 'right',
-			align: 'right',
-		},
-	];
+	useEffect(() => {
+		getData();
+	}, []);
 
 	useEffect(() => {
 		getSuppliers();
 	}, [page, pageSize]);
+
+	const getData = async () => {
+		setIsLoading(true);
+		try {
+			await getFroms();
+		} catch (error: any) {
+			message.error(error.message);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const getFroms = async () => {
+		const api = `/supplier/get-form`;
+		const res = await handleAPI(api);
+
+		res.data && setForms(res.data);
+	};
 
 	const getSuppliers = async () => {
 		const api = `/supplier?page=${page}&pageSize=${pageSize}`;
@@ -131,49 +81,50 @@ const Suppliers = () => {
 			await handleAPI(`/supplier/remove?id=${id}`, undefined, 'delete');
 
 			await getSuppliers();
+			message.error('Remove supplier successfully!!!');
 		} catch (error) {
 			console.log(error);
 		}
 	};
 
-	return (
+	return forms ? (
 		<div>
-			<Table
-				pagination={{
-					showSizeChanger: true,
-					onShowSizeChange: (current, size) => {
-						setPageSize(size);
-					},
-					total,
-					onChange(page, pageSize) {
-						setPage(page);
-					},
+			<TableComponet
+				api='supplier'
+				onPageChange={(val) => {
+					setPage(val.page);
+					setPageSize(val.pageSize);
 				}}
-				scroll={{
-					y: 'calc(100vh - 300px)',
+				onAddNew={() => {
+					setIsVisibleModalAddNew(true);
 				}}
 				loading={isLoading}
-				dataSource={suppliers}
-				columns={columns}
-				title={() => (
-					<div className='row'>
-						<div className='col'>
-							<Title level={5}>Suppliers</Title>
-						</div>
-						<div className='col text-right'>
-							<Space>
-								<Button
-									type='primary'
-									onClick={() => setIsVisibleModalAddNew(true)}>
-									Add Supplier
-								</Button>
-								<Button icon={<Sort size={20} color={colors.gray600} />}>
-									Filters
-								</Button>
-								<Button>Download all</Button>
-							</Space>
-						</div>
-					</div>
+				forms={forms}
+				records={suppliers}
+				total={total}
+				extraColumn={(item) => (
+					<Space>
+						<Button
+							type='text'
+							onClick={() => {
+								setSupplierSelected(item);
+								setIsVisibleModalAddNew(true);
+							}}
+							icon={<Edit2 size={18} className='text-info' />}
+						/>
+
+						<Button
+							onClick={() =>
+								confirm({
+									title: 'Comfirm',
+									content: 'Are you sure you want to remove this supplier?',
+									onOk: () => removeSuppiler(item._id),
+								})
+							}
+							type='text'
+							icon={<UserRemove size={18} className='text-danger' />}
+						/>
+					</Space>
 				)}
 			/>
 
@@ -188,6 +139,8 @@ const Suppliers = () => {
 				supplier={supplierSelected}
 			/>
 		</div>
+	) : (
+		<Empty />
 	);
 };
 

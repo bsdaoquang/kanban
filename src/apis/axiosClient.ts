@@ -4,7 +4,7 @@ import axios from 'axios';
 import queryString from 'query-string';
 import { localDataNames } from '../constants/appInfos';
 
-const baseURL = `http://192.168.1.244:3001`;
+const baseURL = `http://192.168.1.9:3001`;
 
 const getAssetToken = () => {
 	const res = localStorage.getItem(localDataNames.authData);
