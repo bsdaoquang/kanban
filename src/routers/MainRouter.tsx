@@ -17,10 +17,7 @@ const { Content, Footer, Header, Sider } = Layout;
 const MainRouter = () => {
 	return (
 		<BrowserRouter>
-			<Layout
-				style={{
-					backgroundColor: 'white',
-				}}>
+			<Layout>
 				<Affix offsetTop={0}>
 					<SiderComponent />
 				</Affix>

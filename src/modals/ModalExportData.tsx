@@ -1,9 +1,20 @@
 /** @format */
 
-import { Button, Checkbox, DatePicker, List, Modal, Space } from 'antd';
+import {
+	Button,
+	Checkbox,
+	DatePicker,
+	Divider,
+	List,
+	message,
+	Modal,
+	Space,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
 import { FormModel } from '../models/FormModel';
 import handleAPI from '../apis/handleAPI';
+import { DateTime } from '../utils/dateTime';
+import { hanldExportExcel } from '../utils/handleExportExcel';
 
 interface Props {
 	visible: boolean;
@@ -21,16 +32,17 @@ const ModalExportData = (props: Props) => {
 	const [isGetting, setIsGetting] = useState(false);
 	const [forms, setForms] = useState<FormModel>();
 	const [checkedValues, setCheckedValues] = useState<string[]>([]);
+	const [timeSelected, setTimeSelected] = useState<string>('ranger');
+	const [dates, setDates] = useState({
+		start: '',
+		end: '',
+	});
 
 	useEffect(() => {
 		if (visible) {
 			getFroms();
 		}
 	}, [visible, api]);
-
-	const handleExport = async () => {
-		console.log(checkedValues);
-	};
 
 	const getFroms = async () => {
 		const url = `/${api}/get-form`;
@@ -58,6 +70,37 @@ const ModalExportData = (props: Props) => {
 		setCheckedValues(items);
 	};
 
+	const handleExport = async () => {
+		let url = ``;
+		if (timeSelected !== 'all' && dates.start && dates.end) {
+			if (new Date(dates.start).getTime() > new Date(dates.end).getTime()) {
+				message.error('Thời gian lỗi!!!');
+			} else {
+				url = `/${api}/get-export-data/?start=${dates.start}&end=${dates.end}`;
+			}
+		} else {
+			url = `/${api}/get-export-data`;
+		}
+
+		const data = checkedValues;
+		if (Object.keys(data).length > 0) {
+			setIsLoading(true);
+			try {
+				const res = await handleAPI(url, data, 'post');
+
+				res.data && (await hanldExportExcel(res.data, api));
+
+				onClose();
+			} catch (error: any) {
+				message.error(error.message);
+			} finally {
+				setIsLoading(false);
+			}
+		} else {
+			message.error('Please selcte 1 key of values');
+		}
+	};
+
 	return (
 		<Modal
 			loading={isGetting}
@@ -70,11 +113,47 @@ const ModalExportData = (props: Props) => {
 			}}
 			title='Export to excel'>
 			<div>
-				<Space>
-					<RangePicker onChange={(val) => console.log(val)} />
-					<Button type='link'>Export all</Button>
-				</Space>
+				<div>
+					<Checkbox
+						checked={timeSelected === 'all'}
+						onChange={(val) =>
+							setTimeSelected(timeSelected === 'all' ? 'ranger' : 'all')
+						}>
+						Get all
+					</Checkbox>
+				</div>
+				<div className='mt-2'>
+					<Checkbox
+						checked={timeSelected === 'ranger'}
+						onChange={(val) =>
+							setTimeSelected(timeSelected === 'all' ? 'ranger' : 'all')
+						}>
+						Date ranger
+					</Checkbox>
+				</div>
+				<div className='mt-2'>
+					{timeSelected === 'ranger' && (
+						<Space>
+							<RangePicker
+								onChange={(val: any) =>
+									setDates(
+										val && val[0] && val[1]
+											? {
+													start: `${DateTime.CalendarDate(val[0])} 00:00:00`,
+													end: `${DateTime.CalendarDate(val[1])} 00:00:00`,
+											  }
+											: {
+													start: '',
+													end: '',
+											  }
+									)
+								}
+							/>
+						</Space>
+					)}
+				</div>
 			</div>
+			<Divider />
 			<div className='mt-2'>
 				<List
 					dataSource={forms?.formItems}
