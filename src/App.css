@@ -40,3 +40,17 @@
 .ant-menu-title-content a:hover{
   text-decoration: none;
 }
+
+.icon-wapper {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  padding: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-card-body {
+  padding: 16px !important;
+}
