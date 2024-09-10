@@ -11,6 +11,7 @@ import {
 	Suppliers,
 } from '../screens';
 import { HeaderComponent, SiderComponent } from '../components';
+import AddProduct from '../screens/inventories/AddProduct';
 
 const { Content, Footer, Header, Sider } = Layout;
 
@@ -28,17 +29,20 @@ const MainRouter = () => {
 					<Affix offsetTop={0}>
 						<HeaderComponent />
 					</Affix>
-					<Content className='mt-3 mb-2 container-fluid bg-white'>
+					<Content className='pt-3 container-fluid'>
 						<Routes>
 							<Route path='/' element={<HomeScreen />} />
-							<Route path='/inventory' element={<Inventories />} />
+							<Route>
+								<Route path='/inventory' element={<Inventories />} />
+								<Route path='/inventory/add-product' element={<AddProduct />} />
+							</Route>
 							<Route path='/report' element={<ReportScreen />} />
 							<Route path='/suppliers' element={<Suppliers />} />
 							<Route path='/orders' element={<Orders />} />
 							<Route path='/manage-store' element={<ManageStore />} />
 						</Routes>
 					</Content>
-					<Footer />
+					<Footer className='bg-white' />
 				</Layout>
 			</Layout>
 		</BrowserRouter>

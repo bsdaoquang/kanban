@@ -30,7 +30,7 @@ const HeaderComponent = () => {
 	];
 
 	return (
-		<div className='p-2 row bg-white'>
+		<div className='p-2 row bg-white m-0'>
 			<div className='col'>
 				<Input
 					placeholder='Search product, supplier, order'

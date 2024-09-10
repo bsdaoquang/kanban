@@ -24,6 +24,12 @@ const SiderComponent = () => {
 			key: 'inventory',
 			label: <Link to={'/inventory'}>Inventory</Link>,
 			icon: <MdOutlineInventory size={20} />,
+			children: [
+				{
+					key: 'addNew',
+					label: <Link to={`/inventory/add-product`}>Add new</Link>,
+				},
+			],
 		},
 		{
 			key: 'Report',
@@ -60,7 +66,7 @@ const SiderComponent = () => {
 					{appInfo.title}
 				</Text>
 			</div>
-			<Menu items={items} theme='light' />
+			<Menu mode='inline' items={items} theme='light' />
 		</Sider>
 	);
 };

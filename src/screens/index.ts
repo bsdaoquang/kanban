@@ -2,7 +2,7 @@
 
 import Login from './auth/Login';
 import SignUp from './auth/SignUp';
-import Inventories from './Inventories';
+import Inventories from './inventories/Inventories';
 import ManageStore from './ManageStore';
 import Orders from './Orders';
 import ReportScreen from './ReportScreen';
