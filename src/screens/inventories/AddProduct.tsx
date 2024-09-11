@@ -10,13 +10,16 @@ import {
 	message,
 	Select,
 	Space,
+	Spin,
 	Typography,
 } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import handleAPI from '../../apis/handleAPI';
-import { SelectModel } from '../../models/FormModel';
+import { SelectModel, TreeModel } from '../../models/FormModel';
 import { replaceName } from '../../utils/replaceName';
 import { uploadFile } from '../../utils/uploadFile';
+import { Add } from 'iconsax-react';
+import { ModalCategory } from '../../modals';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -25,6 +28,8 @@ const AddProduct = () => {
 	const [content, setcontent] = useState('');
 	const [supplierOptions, setSupplierOptions] = useState<SelectModel[]>([]);
 	const [fileUrl, setFileUrl] = useState('');
+	const [isVisibleAddCategory, setIsVisibleAddCategory] = useState(false);
+	const [categories, setCategories] = useState<TreeModel[]>([]);
 
 	const editorRef = useRef<any>(null);
 	const [form] = Form.useForm();
@@ -34,17 +39,19 @@ const AddProduct = () => {
 	}, []);
 
 	const getData = async () => {
+		setIsLoading(true);
 		try {
 			await getSuppliers();
+			await getCategories();
 		} catch (error: any) {
 			message.error(error.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleAddNewProduct = async (values: any) => {
 		const content = editorRef.current.getContent();
-
-		console.log(content);
 	};
 
 	const getSuppliers = async () => {
@@ -60,7 +67,52 @@ const AddProduct = () => {
 		setSupplierOptions(options);
 	};
 
-	return (
+	const getTreeValues = (data: any[], key: string) => {
+		const items: any[] = [];
+		const keys: string[] = [];
+
+		data.forEach((item) => {
+			if (item[`${key}`] && !keys.includes(item[`${key}`])) {
+				keys.push(item[`${key}`]);
+			}
+		});
+
+		data.forEach((item) => {
+			if (item[`${key}`]) {
+				const index = items.findIndex(
+					(element) => element.value === item[`${key}`]
+				);
+
+				const children = data.filter(
+					(element) => element[`${key}`] === item[`${key}`]
+				);
+
+				if (index !== -1) {
+					items[index].children = children.map((value) => ({
+						title: value.title,
+						value: value._id,
+					}));
+				}
+			} else {
+				items.push({ title: item.title, value: item._id });
+			}
+		});
+
+		return items;
+	};
+
+	const getCategories = async () => {
+		const res = await handleAPI(`/products/get-categories`);
+		const datas = res.data;
+
+		const data = datas.length > 0 ? getTreeValues(datas, 'parentId') : [];
+
+		setCategories(data);
+	};
+
+	return isLoading ? (
+		<Spin />
+	) : (
 		<div>
 			<div className='container'>
 				<Title level={3}>Add new Product</Title>
@@ -150,8 +202,16 @@ const AddProduct = () => {
 											<>
 												{menu}
 
-												<Divider />
-												<Button type='link'>Add new</Button>
+												<Divider className='m-0' />
+												<Button
+													onClick={() => setIsVisibleAddCategory(true)}
+													type='link'
+													icon={<Add size={20} />}
+													style={{
+														padding: '0 16px',
+													}}>
+													Add new
+												</Button>
 											</>
 										)}
 									/>
@@ -201,6 +261,15 @@ const AddProduct = () => {
 					</div>
 				</Form>
 			</div>
+
+			<ModalCategory
+				visible={isVisibleAddCategory}
+				onClose={() => setIsVisibleAddCategory(false)}
+				onAddNew={async (val) => {
+					await getCategories();
+				}}
+				values={categories}
+			/>
 		</div>
 	);
 };
