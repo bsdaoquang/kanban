@@ -12,6 +12,7 @@ import {
 } from '../screens';
 import { HeaderComponent, SiderComponent } from '../components';
 import AddProduct from '../screens/inventories/AddProduct';
+import Categories from '../screens/Categories';
 
 const { Content, Footer, Header, Sider } = Layout;
 
@@ -39,6 +40,7 @@ const MainRouter = () => {
 							<Route path='/report' element={<ReportScreen />} />
 							<Route path='/suppliers' element={<Suppliers />} />
 							<Route path='/orders' element={<Orders />} />
+							<Route path='/categories' element={<Categories />} />
 							<Route path='/manage-store' element={<ManageStore />} />
 						</Routes>
 					</Content>

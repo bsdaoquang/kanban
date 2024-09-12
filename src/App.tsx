@@ -7,7 +7,7 @@ import store from './redux/store';
 import './App.css';
 
 message.config({
-	top: 30,
+	top: 20,
 	duration: 2,
 	maxCount: 3,
 	rtl: true,

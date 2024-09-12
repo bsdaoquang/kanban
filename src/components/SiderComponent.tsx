@@ -8,6 +8,7 @@ import { CiViewList } from 'react-icons/ci';
 import { MdOutlineInventory } from 'react-icons/md';
 import { appInfo } from '../constants/appInfos';
 import { colors } from '../constants/colors';
+import { FaTags } from 'react-icons/fa';
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -30,6 +31,11 @@ const SiderComponent = () => {
 					label: <Link to={`/inventory/add-product`}>Add new</Link>,
 				},
 			],
+		},
+		{
+			key: 'Categories',
+			label: <Link to={'/categories'}>Categories</Link>,
+			icon: <FaTags size={20} className='text-muted' />,
 		},
 		{
 			key: 'Report',
