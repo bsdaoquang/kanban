@@ -17,6 +17,9 @@ import {
 import { ColumnProps } from 'antd/es/table';
 import { Edit, Edit2, Trash } from 'iconsax-react';
 import { colors } from '../constants/colors';
+import { TreeModel } from '../models/FormModel';
+import { getTreeValues } from '../utils/getTreeValues';
+import { AddCategory } from '../components';
 
 const { confirm } = Modal;
 
@@ -25,6 +28,8 @@ const Categories = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
+	const [treeValues, setTreeValues] = useState<TreeModel[]>([]);
+	const [categorySelected, setCategorySelected] = useState<CategoyModel>();
 
 	/*
 
@@ -35,22 +40,33 @@ const Categories = () => {
   */
 
 	useEffect(() => {
-		getCategories();
+		getCategories(`/products/get-categories`, true);
+	}, []);
+
+	useEffect(() => {
+		const api = `/products/get-categories?page=${page}&pageSize=${pageSize}`;
+		getCategories(api);
 	}, [page, pageSize]);
 
-	const getCategories = async () => {
+	const getCategories = async (api: string, isSelect?: boolean) => {
 		try {
-			const res = await handleAPI(
-				`/products/get-categories?page=${page}&pageSize=${pageSize}`
-			);
+			const res = await handleAPI(api);
 
 			setCategories(res.data);
+
+			if (isSelect) {
+				setTreeValues(getTreeValues(res.data, 'parentId'));
+			}
 		} catch (error) {
 			console.log(error);
 		} finally {
 			setIsLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		console.log(categories);
+	}, [categories]);
 
 	const columns: ColumnProps<CategoyModel>[] = [
 		{
@@ -71,6 +87,7 @@ const Categories = () => {
 				<Space>
 					<Tooltip title='Edit categories' key={'btnEdit'}>
 						<Button
+							onClick={() => setCategorySelected(item)}
 							icon={<Edit2 size={20} color={colors.gray600} />}
 							type='text'
 						/>
@@ -115,7 +132,34 @@ const Categories = () => {
 		<div>
 			<div className='container'>
 				<div className='row'>
-					<div className='col-md-4'>form</div>
+					<div className='col-md-4'>
+						<Card title={'Add new'}>
+							<AddCategory
+								onClose={() => setCategorySelected(undefined)}
+								seleted={categorySelected}
+								values={treeValues}
+								onAddNew={(val) => {
+									if (categorySelected) {
+										const items = [...categories];
+										const index = items.findIndex(
+											(element) => element._id === categorySelected._id
+										);
+										if (index !== -1) {
+											items[index] = val;
+										}
+
+										setCategories(items);
+
+										setCategorySelected(undefined);
+									} else {
+										getCategories(
+											`/products/get-categories?page=${page}&pageSize=${pageSize}`
+										);
+									}
+								}}
+							/>
+						</Card>
+					</div>
 					<div className='col-md-8'>
 						<Card>
 							<Table
