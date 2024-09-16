@@ -1,8 +1,8 @@
 /** @format */
 
 import { useEffect, useState } from 'react';
-import handleAPI from '../apis/handleAPI';
-import { CategoyModel } from '../models/Products';
+import handleAPI from '../../apis/handleAPI';
+import { CategoyModel } from '../../models/Products';
 import {
 	Button,
 	Card,
@@ -16,10 +16,11 @@ import {
 } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { Edit, Edit2, Trash } from 'iconsax-react';
-import { colors } from '../constants/colors';
-import { TreeModel } from '../models/FormModel';
-import { getTreeValues } from '../utils/getTreeValues';
-import { AddCategory } from '../components';
+import { colors } from '../../constants/colors';
+import { TreeModel } from '../../models/FormModel';
+import { getTreeValues } from '../../utils/getTreeValues';
+import { AddCategory } from '../../components';
+import { Link } from 'react-router-dom';
 
 const { confirm } = Modal;
 
@@ -52,10 +53,10 @@ const Categories = () => {
 		try {
 			const res = await handleAPI(api);
 
-			setCategories(res.data);
+			setCategories(getTreeValues(res.data, false));
 
 			if (isSelect) {
-				setTreeValues(getTreeValues(res.data, 'parentId'));
+				setTreeValues(getTreeValues(res.data, true));
 			}
 		} catch (error) {
 			console.log(error);
@@ -64,15 +65,16 @@ const Categories = () => {
 		}
 	};
 
-	useEffect(() => {
-		console.log(categories);
-	}, [categories]);
-
 	const columns: ColumnProps<CategoyModel>[] = [
 		{
 			key: 'title',
 			title: 'Name',
-			dataIndex: 'title',
+			dataIndex: '',
+			render: (item: CategoyModel) => (
+				<Link to={`/categories/detail/${item.slug}?id=${item._id}`}>
+					{item.title}
+				</Link>
+			),
 		},
 		{
 			key: 'description',
@@ -138,7 +140,7 @@ const Categories = () => {
 								onClose={() => setCategorySelected(undefined)}
 								seleted={categorySelected}
 								values={treeValues}
-								onAddNew={(val) => {
+								onAddNew={async (val) => {
 									if (categorySelected) {
 										const items = [...categories];
 										const index = items.findIndex(
@@ -149,8 +151,9 @@ const Categories = () => {
 										}
 
 										setCategories(items);
-
 										setCategorySelected(undefined);
+
+										await getCategories(`/products/get-categories`, true);
 									} else {
 										getCategories(
 											`/products/get-categories?page=${page}&pageSize=${pageSize}`
@@ -162,21 +165,7 @@ const Categories = () => {
 					</div>
 					<div className='col-md-8'>
 						<Card>
-							<Table
-								// pagination={{
-								// 	pageSize: 1,
-								// 	showSizeChanger: true,
-								// 	onChange: (vals) => {
-								// 		setPage(vals);
-								// 	},
-								// 	onShowSizeChange: (val) => {
-								// 		console.log(val);
-								// 	},
-								// }}
-								size='small'
-								dataSource={categories}
-								columns={columns}
-							/>
+							<Table size='small' dataSource={categories} columns={columns} />
 						</Card>
 					</div>
 				</div>
