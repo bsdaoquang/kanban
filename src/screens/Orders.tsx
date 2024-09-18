@@ -1,9 +1,11 @@
 /** @format */
 
-import React from 'react';
+import { useEffect, useState } from 'react';
+import Resizer from 'react-image-file-resizer';
+import { uploadFile } from '../utils/uploadFile';
 
 const Orders = () => {
-	return <div>Orders</div>;
+	return <></>;
 };
 
 export default Orders;

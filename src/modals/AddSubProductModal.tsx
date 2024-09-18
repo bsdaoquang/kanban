@@ -3,21 +3,19 @@
 import {
 	ColorPicker,
 	Form,
-	GetProp,
+	Image,
 	Input,
 	InputNumber,
+	message,
 	Modal,
-	Select,
 	Typography,
 	Upload,
-	UploadFile,
 	UploadProps,
-	Image,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { ProductModel } from '../models/Products';
-import { url } from 'inspector';
 import { colors } from '../constants/colors';
+import { ProductModel } from '../models/Products';
+import { handleResize, uploadFile } from '../utils/uploadFile';
 
 interface Props {
 	visible: boolean;
@@ -39,7 +37,33 @@ const AddSubProductModal = (props: Props) => {
 	}, []);
 
 	const handleAddSubproduct = async (values: any) => {
-		console.log(product?._id);
+		if (product) {
+			const data: any = {};
+			for (const i in values) {
+				data[i] = values[i] ?? '';
+			}
+			data.productId = product._id;
+			if (fileList.length > 0) {
+				const urls: string[] = [];
+				fileList.forEach(async (file) => {
+					const url = await uploadFile(file.originFileObj);
+					url && urls.push(url);
+				});
+
+				data.images = urls;
+			}
+
+			console.log(data);
+			// setIsLoading(true);
+			// try {
+			// } catch (error) {
+			// 	console.log(error);
+			// } finally {
+			// 	setIsLoading(false);
+			// }
+		} else {
+			message.error('Need to product detail');
+		}
 	};
 
 	const handleCancel = () => {
