@@ -13,18 +13,20 @@ import {
 	UploadProps,
 } from 'antd';
 import { useEffect, useState } from 'react';
+import handleAPI from '../apis/handleAPI';
 import { colors } from '../constants/colors';
-import { ProductModel } from '../models/Products';
-import { handleResize, uploadFile } from '../utils/uploadFile';
+import { ProductModel, SubProductModel } from '../models/Products';
+import { uploadFile } from '../utils/uploadFile';
 
 interface Props {
 	visible: boolean;
 	onClose: () => void;
 	product?: ProductModel;
+	onAddNew: (val: SubProductModel) => void;
 }
 
 const AddSubProductModal = (props: Props) => {
-	const { visible, onClose, product } = props;
+	const { visible, onClose, product, onAddNew } = props;
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [fileList, setFileList] = useState<any[]>([]);
@@ -53,14 +55,25 @@ const AddSubProductModal = (props: Props) => {
 				data.images = urls;
 			}
 
-			console.log(data);
-			// setIsLoading(true);
-			// try {
-			// } catch (error) {
-			// 	console.log(error);
-			// } finally {
-			// 	setIsLoading(false);
-			// }
+			if (data.color) {
+				data.color =
+					typeof data.color === 'string'
+						? data.color
+						: data.color.toHexString();
+			}
+
+			setIsLoading(true);
+			const api = `/products/add-sub-product`;
+			try {
+				const res = await handleAPI(api, data, 'post');
+
+				onAddNew(res.data);
+				handleCancel();
+			} catch (error) {
+				console.log(error);
+			} finally {
+				setIsLoading(false);
+			}
 		} else {
 			message.error('Need to product detail');
 		}
@@ -104,7 +117,14 @@ const AddSubProductModal = (props: Props) => {
 				form={form}
 				disabled={isLoading}>
 				<Form.Item name='color' label='Color'>
-					<ColorPicker format='hex' />
+					<ColorPicker
+						format='hex'
+						// onChange={(val) => {
+						// 	const color = typeof val === 'string' ? val : val.toHexString();
+
+						// 	console.log(color);
+						// }}
+					/>
 				</Form.Item>
 				<Form.Item
 					rules={[

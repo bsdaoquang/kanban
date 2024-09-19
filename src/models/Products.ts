@@ -22,4 +22,18 @@ export interface ProductModel {
 	updatedAt: string;
 	__v: number;
 	isDeleted: boolean;
+	subItems: SubProductModel[];
+}
+
+export interface SubProductModel {
+	size: string;
+	color: string;
+	price: number;
+	qty: number;
+	productId: string;
+	images: any[];
+	_id: string;
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
 }

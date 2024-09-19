@@ -58,3 +58,7 @@
 .ant-divider-horizontal{
   margin: 0 0 16px 0
 }
+
+a{
+  text-decoration: none !important;
+}

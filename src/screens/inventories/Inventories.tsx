@@ -1,14 +1,29 @@
 /** @format */
 
-import { Avatar, Button, QRCode, Space, Table, Tooltip } from 'antd';
+import {
+	Avatar,
+	Button,
+	Modal,
+	QRCode,
+	Space,
+	Table,
+	Tag,
+	Tooltip,
+	Typography,
+} from 'antd';
 import { useEffect, useState } from 'react';
 import handleAPI from '../../apis/handleAPI';
-import { ProductModel } from '../../models/Products';
+import { ProductModel, SubProductModel } from '../../models/Products';
 import { ColumnProps } from 'antd/es/table';
 import CategoryComponent from '../../components/CategoryComponent';
 import { MdLibraryAdd } from 'react-icons/md';
 import { colors } from '../../constants/colors';
 import { AddSubProductModal } from '../../modals';
+import { Link } from 'react-router-dom';
+import { Edit2, Trash } from 'iconsax-react';
+
+const { confirm } = Modal;
+
 const Inventories = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [products, setProducts] = useState<ProductModel[]>([]);
@@ -24,6 +39,7 @@ const Inventories = () => {
 		try {
 			const res = await handleAPI('/products');
 			setProducts(res.data);
+			// console.log(res.data);
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -31,30 +47,39 @@ const Inventories = () => {
 		}
 	};
 
-	/*
-		title,
-		description
-		categories,
-		colors
-		size
-		price,
-		comments
-		buys
-		stocks
-		actions
-		images
-	*/
+	const getMinMaxValues = (data: SubProductModel[]) => {
+		const nums: number[] = [];
+
+		if (data.length > 0) {
+			data.forEach((item) => nums.push(item.price));
+		}
+
+		return nums.length > 0
+			? `${Math.min(...nums).toLocaleString()} - ${Math.max(
+					...nums
+			  ).toLocaleString()}`
+			: '';
+	};
+
+	const hanleRemoveProduct = async (id: string) => {};
 
 	const columns: ColumnProps<ProductModel>[] = [
 		{
 			key: 'title',
-			dataIndex: 'title',
+			dataIndex: '',
 			title: 'Title',
+			width: 300,
+			render: (item: ProductModel) => (
+				<Link to={`/inventory/detail/${item.slug}?id=${item._id}`}>
+					{item.title}
+				</Link>
+			),
 		},
 		{
 			key: 'description',
 			dataIndex: 'description',
 			title: 'description',
+			width: 400,
 		},
 		{
 			key: 'categories',
@@ -67,6 +92,7 @@ const Inventories = () => {
 					))}
 				</Space>
 			),
+			width: 300,
 		},
 		{
 			key: 'images',
@@ -83,15 +109,71 @@ const Inventories = () => {
 						</Avatar.Group>
 					</Space>
 				),
+			width: 300,
+		},
+		{
+			key: 'colors',
+			dataIndex: 'subItems',
+			title: 'Color',
+			render: (items: SubProductModel[]) => (
+				<Space>
+					{items.length > 0 &&
+						items.map((item, index) => (
+							<div
+								style={{
+									width: 24,
+									height: 24,
+									backgroundColor: item.color,
+									borderRadius: 12,
+								}}
+								key={`color${item.color}${index}`}
+							/>
+						))}
+				</Space>
+			),
+			width: 300,
+		},
+		{
+			key: 'sizes',
+			dataIndex: 'subItems',
+			title: 'Sizes',
+			render: (items: SubProductModel[]) => (
+				<Space wrap>
+					{items.length > 0 &&
+						items.map((item) => (
+							<Tag key={`size${item.size}`}>{item.size}</Tag>
+						))}
+				</Space>
+			),
+			width: 150,
+		},
+		{
+			key: 'price',
+			dataIndex: 'subItems',
+			title: 'Price',
+			render: (items: SubProductModel[]) => (
+				<Typography.Text>{getMinMaxValues(items)}</Typography.Text>
+			),
+			width: 200,
+		},
+		{
+			key: 'stock',
+			dataIndex: 'subItems',
+			title: 'Stock',
+			render: (items: SubProductModel[]) =>
+				items.reduce((a, b) => a + b.qty, 0),
+			align: 'right',
+			width: 100,
 		},
 		{
 			key: 'actions',
 			title: 'Actions',
 			dataIndex: '',
 			fixed: 'right',
+			width: 150,
 			render: (item: ProductModel) => (
 				<Space>
-					<Tooltip title='Add sub product'>
+					<Tooltip title='Add sub product' key={'addSubProduct'}>
 						<Button
 							icon={<MdLibraryAdd color={colors.primary500} size={20} />}
 							type='text'
@@ -101,21 +183,35 @@ const Inventories = () => {
 							}}
 						/>
 					</Tooltip>
+					<Tooltip title='Edit product' key={'btnEdit'}>
+						<Button
+							icon={<Edit2 color={colors.primary500} size={20} />}
+							type='text'
+							onClick={() => {
+								setProductSelected(item);
+								console.log(productSelected);
+							}}
+						/>
+					</Tooltip>
+					<Tooltip title='Delete product' key={'btnDelete'}>
+						<Button
+							icon={<Trash className='text-danger' size={20} />}
+							type='text'
+							onClick={() =>
+								confirm({
+									title: 'Confirm?',
+									content: 'Are you sure you want to delete this item?',
+									onCancel: () => console.log('cancel'),
+									onOk: () => hanleRemoveProduct(item._id),
+								})
+							}
+						/>
+					</Tooltip>
 				</Space>
 			),
 			align: 'right',
 		},
 	];
-
-	/*
-		sub product
-
-		color
-		size? 
-		price
-		qty
-
-	*/
 
 	return (
 		<div>
@@ -126,6 +222,8 @@ const Inventories = () => {
 				scroll={{
 					x: '100%',
 				}}
+				bordered
+				size='small'
 			/>
 
 			<AddSubProductModal
@@ -134,6 +232,12 @@ const Inventories = () => {
 				onClose={() => {
 					setProductSelected(undefined);
 					setIsVisibleAddSubProduct(false);
+				}}
+				onAddNew={async (val) => {
+					// cách 1: Thêm dữ liệu, không gọi lại api
+
+					// cách 2: gọi lại api
+					await getProducts();
 				}}
 			/>
 		</div>

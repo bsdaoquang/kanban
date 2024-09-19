@@ -7,6 +7,7 @@ import {
 	Inventories,
 	ManageStore,
 	Orders,
+	ProductDetail,
 	ReportScreen,
 	Suppliers,
 } from '../screens';
@@ -37,6 +38,10 @@ const MainRouter = () => {
 							<Route>
 								<Route path='/inventory' element={<Inventories />} />
 								<Route path='/inventory/add-product' element={<AddProduct />} />
+								<Route
+									path='/inventory/detail/:slug'
+									element={<ProductDetail />}
+								/>
 							</Route>
 							<Route path='/report' element={<ReportScreen />} />
 							<Route path='/suppliers' element={<Suppliers />} />
