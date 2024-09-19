@@ -3,6 +3,7 @@
 import {
 	Avatar,
 	Button,
+	message,
 	Modal,
 	QRCode,
 	Space,
@@ -61,7 +62,29 @@ const Inventories = () => {
 			: '';
 	};
 
-	const hanleRemoveProduct = async (id: string) => {};
+	const hanleRemoveProduct = async (id: string) => {
+		const api = `/products/delete?id=${id}`;
+		try {
+			await handleAPI(api, undefined, 'delete');
+
+			// cach 1: gọi lại api để load lại dữ liệu
+			// await getProducts()
+
+			// Cách 2: xoá item ra khỏi mảng, set lại state
+			const items = [...products];
+			const index = items.findIndex((element) => element._id === id);
+
+			if (index !== -1) {
+				items.splice(index, 1);
+			}
+
+			setProducts(items);
+
+			message.success('Product removed!!!');
+		} catch (error: any) {
+			message.error(error.message);
+		}
+	};
 
 	const columns: ColumnProps<ProductModel>[] = [
 		{
