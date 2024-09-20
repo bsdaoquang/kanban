@@ -23,6 +23,7 @@ import { uploadFile } from '../../utils/uploadFile';
 import { Add } from 'iconsax-react';
 import { ModalCategory } from '../../modals';
 import { getTreeValues } from '../../utils/getTreeValues';
+import { useSearchParams } from 'react-router-dom';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -35,6 +36,11 @@ const AddProduct = () => {
 	const [categories, setCategories] = useState<TreeModel[]>([]);
 	const [isCreating, setIsCreating] = useState(false);
 	const [files, setFiles] = useState<any[]>([]);
+	const [productImages, setProductImages] = useState([]);
+
+	const [searchParams] = useSearchParams();
+
+	const id = searchParams.get('id');
 
 	const editorRef = useRef<any>(null);
 	const inpFileRef = useRef<any>(null);
@@ -43,6 +49,12 @@ const AddProduct = () => {
 	useEffect(() => {
 		getData();
 	}, []);
+
+	useEffect(() => {
+		if (id) {
+			getProductDetail(id);
+		}
+	}, [id]);
 
 	const getData = async () => {
 		setIsLoading(true);
@@ -53,6 +65,22 @@ const AddProduct = () => {
 			message.error(error.message);
 		} finally {
 			setIsLoading(false);
+		}
+	};
+
+	const getProductDetail = async (id: string) => {
+		const api = `/products/detail?id=${id}`;
+
+		try {
+			const res = await handleAPI(api);
+			const item = res.data;
+
+			if (item) {
+				form.setFieldsValue(item);
+				setcontent(item.content);
+			}
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
@@ -80,7 +108,11 @@ const AddProduct = () => {
 		}
 
 		try {
-			await handleAPI('/products/add-new', data, 'post');
+			await handleAPI(
+				`/products/${id ? `update?id=${id}` : 'add-new'}`,
+				data,
+				id ? 'put' : 'post'
+			);
 			window.history.back();
 		} catch (error) {
 			console.log(error);
@@ -196,7 +228,7 @@ const AddProduct = () => {
 										type='primary'
 										size='middle'
 										onClick={() => form.submit()}>
-										Submit
+										{id ? 'Update' : 'Submit'}
 									</Button>
 								</Space>
 							</Card>

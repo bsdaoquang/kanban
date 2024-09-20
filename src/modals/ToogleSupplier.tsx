@@ -1,26 +1,15 @@
 /** @format */
 
-import {
-	Avatar,
-	Button,
-	Form,
-	Input,
-	message,
-	Modal,
-	Select,
-	Typography,
-} from 'antd';
+import { Avatar, Button, Form, message, Modal, Typography } from 'antd';
 import { User } from 'iconsax-react';
 import { useEffect, useRef, useState } from 'react';
 import handleAPI from '../apis/handleAPI';
+import FormItem from '../components/FormItem';
 import { colors } from '../constants/colors';
+import { FormModel } from '../models/FormModel';
 import { SupplierModel } from '../models/SupplierModel';
 import { replaceName } from '../utils/replaceName';
 import { uploadFile } from '../utils/uploadFile';
-import { demodata } from '../data/demodata';
-import { FormMethod } from 'react-router-dom';
-import { FormModel } from '../models/FormModel';
-import FormItem from '../components/FormItem';
 
 const { Paragraph } = Typography;
 

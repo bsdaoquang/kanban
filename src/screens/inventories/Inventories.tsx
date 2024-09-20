@@ -20,7 +20,7 @@ import CategoryComponent from '../../components/CategoryComponent';
 import { MdLibraryAdd } from 'react-icons/md';
 import { colors } from '../../constants/colors';
 import { AddSubProductModal } from '../../modals';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Edit2, Trash } from 'iconsax-react';
 
 const { confirm } = Modal;
@@ -30,6 +30,8 @@ const Inventories = () => {
 	const [products, setProducts] = useState<ProductModel[]>([]);
 	const [isVisibleAddSubProduct, setIsVisibleAddSubProduct] = useState(false);
 	const [productSelected, setProductSelected] = useState<ProductModel>();
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		getProducts();
@@ -138,22 +140,30 @@ const Inventories = () => {
 			key: 'colors',
 			dataIndex: 'subItems',
 			title: 'Color',
-			render: (items: SubProductModel[]) => (
-				<Space>
-					{items.length > 0 &&
-						items.map((item, index) => (
-							<div
-								style={{
-									width: 24,
-									height: 24,
-									backgroundColor: item.color,
-									borderRadius: 12,
-								}}
-								key={`color${item.color}${index}`}
-							/>
-						))}
-				</Space>
-			),
+			render: (items: SubProductModel[]) => {
+				const colors: string[] = [];
+
+				items.forEach(
+					(sub) => !colors.includes(sub.color) && colors.push(sub.color)
+				);
+
+				return (
+					<Space>
+						{colors.length > 0 &&
+							colors.map((item, index) => (
+								<div
+									style={{
+										width: 24,
+										height: 24,
+										backgroundColor: item,
+										borderRadius: 12,
+									}}
+									key={`color${item}${index}`}
+								/>
+							))}
+					</Space>
+				);
+			},
 			width: 300,
 		},
 		{
@@ -210,10 +220,7 @@ const Inventories = () => {
 						<Button
 							icon={<Edit2 color={colors.primary500} size={20} />}
 							type='text'
-							onClick={() => {
-								setProductSelected(item);
-								console.log(productSelected);
-							}}
+							onClick={() => navigate(`/inventory/add-product?id=${item._id}`)}
 						/>
 					</Tooltip>
 					<Tooltip title='Delete product' key={'btnDelete'}>
