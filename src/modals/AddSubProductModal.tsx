@@ -85,15 +85,16 @@ const AddSubProductModal = (props: Props) => {
 	};
 
 	const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-		const items = newFileList.map(
-			(item) =>
-				item.originFileObj && {
-					...item,
-					url: item.originFileObj
-						? URL.createObjectURL(item.originFileObj)
-						: '',
-					status: 'done',
-				}
+		const items = newFileList.map((item) =>
+			item.originFileObj
+				? {
+						...item,
+						url: item.originFileObj
+							? URL.createObjectURL(item.originFileObj)
+							: '',
+						status: 'done',
+				  }
+				: { ...item }
 		);
 
 		setFileList(items);
