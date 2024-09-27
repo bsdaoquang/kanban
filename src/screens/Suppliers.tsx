@@ -57,7 +57,7 @@ const Suppliers = () => {
 		try {
 			const res = await handleAPI(api);
 			res.data && setSuppliers(res.data.items);
-
+			console.log(res.data);
 			const items: SupplierModel[] = [];
 
 			res.data.items.forEach((item: any, index: number) =>

@@ -62,3 +62,17 @@
 a{
   text-decoration: none !important;
 }
+.text-2-line{
+  line-height: 1.5em;
+    height: 1.5em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.filter-card{
+  -webkit-box-shadow: 0px 9px 29px -17px rgba(66, 68, 90, 1);
+-moz-box-shadow: 0px 9px 29px -17px rgba(66, 68, 90, 1);
+box-shadow: 0px 9px 29px -17px rgba(66, 68, 90, 1);
+}

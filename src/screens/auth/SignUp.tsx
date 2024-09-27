@@ -5,9 +5,8 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import handleAPI from '../../apis/handleAPI';
-import SocialLogin from './components/SocialLogin';
-import { localDataNames } from '../../constants/appInfos';
 import { addAuth } from '../../redux/reducers/authReducer';
+import SocialLogin from './components/SocialLogin';
 
 const { Title, Text, Paragraph } = Typography;
 const SignUp = () => {
@@ -84,14 +83,18 @@ const SignUp = () => {
 						label='Password'
 						rules={[
 							{
-								required: true,
-								message: 'Please enter your password!!!',
+								// required: true,
+								// message: 'Please enter your password!!!',
 							},
 							() => ({
 								validator: (_, value) => {
-									if (value.length < 6) {
+									if (!value) {
 										return Promise.reject(
-											new Error('Mật khẩu phải chứa ít nhất 6 ký tự')
+											new Error('Please enter your password!!!')
+										);
+									} else if (value.length < 6) {
+										return Promise.reject(
+											new Error('Please enter your password!!!')
 										);
 									} else {
 										return Promise.resolve();

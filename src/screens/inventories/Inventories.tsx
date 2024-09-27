@@ -3,46 +3,68 @@
 import {
 	Avatar,
 	Button,
+	Card,
+	Divider,
+	Dropdown,
+	Input,
 	message,
 	Modal,
-	QRCode,
 	Space,
 	Table,
 	Tag,
 	Tooltip,
 	Typography,
 } from 'antd';
-import { useEffect, useState } from 'react';
-import handleAPI from '../../apis/handleAPI';
-import { ProductModel, SubProductModel } from '../../models/Products';
-import { ColumnProps } from 'antd/es/table';
-import CategoryComponent from '../../components/CategoryComponent';
+import { ColumnProps, TableProps } from 'antd/es/table';
+import { Edit2, Sort, Trash } from 'iconsax-react';
+import React, { useEffect, useState } from 'react';
 import { MdLibraryAdd } from 'react-icons/md';
+import { Link, useNavigate } from 'react-router-dom';
+import handleAPI from '../../apis/handleAPI';
+import CategoryComponent from '../../components/CategoryComponent';
 import { colors } from '../../constants/colors';
 import { AddSubProductModal } from '../../modals';
-import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, Trash } from 'iconsax-react';
+import { ProductModel, SubProductModel } from '../../models/Products';
+import { replaceName } from '../../utils/replaceName';
+import { FilterProduct } from '../../components';
+import { FilterProductValue } from '../../components/FilterProduct';
 
 const { confirm } = Modal;
+
+type TableRowSelection<T extends object = object> =
+	TableProps<T>['rowSelection'];
 
 const Inventories = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [products, setProducts] = useState<ProductModel[]>([]);
 	const [isVisibleAddSubProduct, setIsVisibleAddSubProduct] = useState(false);
 	const [productSelected, setProductSelected] = useState<ProductModel>();
+	const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
+	const [total, setTotal] = useState<number>(10);
+	const [searchKey, setSearchKey] = useState('');
 
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		getProducts();
-	}, []);
+		if (!searchKey) {
+			setPage(1);
+			getProducts(`/products?page=${page}&pageSize=${pageSize}`);
+		}
+	}, [searchKey]);
 
-	const getProducts = async () => {
+	useEffect(() => {
+		getProducts(`/products?page=${page}&pageSize=${pageSize}`);
+	}, [page, pageSize]);
+
+	const getProducts = async (api: string) => {
 		setIsLoading(true);
 		try {
-			const res = await handleAPI('/products');
-			setProducts(res.data);
-			// console.log(res.data);
+			const res = await handleAPI(api);
+			const data = res.data;
+			setProducts(data.items.map((item: any) => ({ ...item, key: item._id })));
+			setTotal(data.totalItems);
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -88,6 +110,15 @@ const Inventories = () => {
 		}
 	};
 
+	const onSelectChange = (newSelectRowKeys: React.Key[]) => {
+		setSelectedRowKeys(newSelectRowKeys);
+	};
+
+	const rowSelection: TableRowSelection<ProductModel> = {
+		selectedRowKeys,
+		onChange: onSelectChange,
+	};
+
 	const columns: ColumnProps<ProductModel>[] = [
 		{
 			key: 'title',
@@ -105,6 +136,11 @@ const Inventories = () => {
 			dataIndex: 'description',
 			title: 'description',
 			width: 400,
+			render: (desc: string) => (
+				<Tooltip style={{ width: 320 }} title={desc}>
+					<div className='text-2-line'>{desc}</div>
+				</Tooltip>
+			),
 		},
 		{
 			key: 'categories',
@@ -243,9 +279,129 @@ const Inventories = () => {
 		},
 	];
 
+	const handleSelectAllProduct = async () => {
+		try {
+			const res = await handleAPI('/products');
+
+			const items = res.data.items;
+
+			if (items.length > 0) {
+				const keys = items.map((item: any) => item._id);
+
+				setSelectedRowKeys(keys);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const handleSearchProducts = async () => {
+		const key = replaceName(searchKey);
+		setPage(1);
+		const api = `/products?title=${key}&page=${page}&pageSize=${pageSize}`;
+		setIsLoading(true);
+		try {
+			const res = await handleAPI(api);
+
+			setProducts(res.data.items);
+			setTotal(res.data.total);
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const handleFilterProducts = async (vals: FilterProductValue) => {
+		const api = `/products/filter-products`;
+		try {
+			const res = await handleAPI(api, vals, 'post');
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	return (
 		<div>
+			<div className='row'>
+				<div className='col'>
+					<Typography.Title level={4}>Product</Typography.Title>
+				</div>
+				<div className='col'>
+					{selectedRowKeys.length > 0 && (
+						<Space>
+							<Tooltip title='Delete product'>
+								<Button
+									onClick={() =>
+										confirm({
+											title: 'Confirm?',
+											content: 'Are you sure you want to delete this item?',
+											onCancel: () => {
+												setSelectedRowKeys([]);
+											},
+											onOk: () => {
+												selectedRowKeys.forEach(
+													async (key) => await hanleRemoveProduct(key)
+												);
+											},
+										})
+									}
+									danger
+									type='text'
+									icon={<Trash size={18} className='text-danger' />}>
+									Delete
+								</Button>
+							</Tooltip>
+							<Typography.Text>
+								{selectedRowKeys.length} items selected
+							</Typography.Text>
+							{selectedRowKeys.length < total && (
+								<Button type='link' onClick={handleSelectAllProduct}>
+									Select all
+								</Button>
+							)}
+						</Space>
+					)}
+				</div>
+
+				<div className='col text-right'>
+					<Space>
+						<Input.Search
+							value={searchKey}
+							onChange={(val) => setSearchKey(val.target.value)}
+							onSearch={handleSearchProducts}
+							placeholder='Search'
+							allowClear
+						/>
+						<Dropdown
+							dropdownRender={(menu) => (
+								<FilterProduct
+									values={{}}
+									onFilter={(vals) => handleFilterProducts(vals)}
+								/>
+							)}>
+							<Button icon={<Sort size={20} />}>Filter</Button>
+						</Dropdown>
+						<Divider type='vertical' />
+						<Button type='primary'>Add Product</Button>
+					</Space>
+				</div>
+			</div>
 			<Table
+				pagination={{
+					showSizeChanger: true,
+					onShowSizeChange: (current, size) => {
+						// console.log(current, size);
+						// console.log('size');
+					},
+					total,
+					onChange(page, pageSize) {
+						setPage(page);
+						setPageSize(pageSize);
+					},
+					showQuickJumper: false,
+				}}
+				rowSelection={rowSelection}
 				dataSource={products}
 				columns={columns}
 				loading={isLoading}
@@ -265,9 +421,8 @@ const Inventories = () => {
 				}}
 				onAddNew={async (val) => {
 					// cách 1: Thêm dữ liệu, không gọi lại api
-
 					// cách 2: gọi lại api
-					await getProducts();
+					// await getProducts();
 				}}
 			/>
 		</div>
