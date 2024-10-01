@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import handleAPI from '../apis/handleAPI';
 import { SelectModel } from '../models/SelectModel';
+import { colors } from '../constants/colors';
 
 export interface FilterProductValue {
 	color?: string;
@@ -33,11 +34,11 @@ const FilterProduct = (props: Props) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [selectDatas, setSelectDatas] = useState<{
 		categories: SelectModel[];
-		colors: SelectModel[];
+		colors: string[];
 		prices: number[];
 		sizes: SelectModel[];
 	}>();
-	const [filterValues, setFilterValues] = useState<FilterProductValue>();
+	const [colorSelected, setColorSelected] = useState<string[]>([]);
 
 	const [form] = Form.useForm();
 
@@ -45,24 +46,26 @@ const FilterProduct = (props: Props) => {
 		getData();
 	}, []);
 
+	useEffect(() => {
+		if (
+			selectDatas &&
+			selectDatas.categories &&
+			selectDatas.categories.length > 0
+		) {
+			getFilterValues();
+		}
+	}, [selectDatas?.categories]);
+
 	const getData = async () => {
 		setIsLoading(true);
 
 		try {
 			await getCategories();
-			await getFilterValues();
 		} catch (error) {
 			console.log(error);
 		} finally {
 			setIsLoading(false);
 		}
-	};
-
-	const handleChangeValue = (key: string, val: any) => {
-		const items: any = { ...selectDatas };
-		items[`${key}`] = val;
-
-		setSelectDatas(items);
 	};
 
 	const getCategories = async () => {
@@ -79,14 +82,28 @@ const FilterProduct = (props: Props) => {
 		handleChangeValue('categories', data);
 	};
 
+	const handleChangeValue = (key: string, val: any) => {
+		const items: any = { ...selectDatas };
+		items[`${key}`] = val;
+
+		setSelectDatas(items);
+	};
+
 	const getFilterValues = async () => {
 		const res = await handleAPI('/products/get-filter-values');
+		const items: any = { ...selectDatas };
 
-		setSelectDatas({ ...selectDatas, ...res.data });
+		const data: any = res.data;
+
+		for (const i in data) {
+			items[i] = data[i];
+		}
+
+		setSelectDatas(items);
 	};
 
 	const handleFilter = (values: any) => {
-		onFilter(values);
+		onFilter({ ...values, colors: colorSelected });
 	};
 
 	return (
@@ -110,13 +127,47 @@ const FilterProduct = (props: Props) => {
 								mode='multiple'
 							/>
 						</Form.Item>
-						<Form.Item name='color' label='Color'>
-							<Select
-								options={selectDatas.colors}
-								allowClear
-								placeholder='Color'
-							/>
-						</Form.Item>
+						<>
+							{selectDatas.colors && selectDatas.colors.length > 0 && (
+								<Space wrap className='mb-3'>
+									{selectDatas.colors.map((color) => (
+										<Button
+											onClick={() => {
+												const items = [...colorSelected];
+												const index = items.findIndex(
+													(element) => element === color
+												);
+												if (index !== -1) {
+													items.splice(index, 1);
+												} else {
+													items.push(color);
+												}
+
+												setColorSelected(items);
+											}}
+											key={color}
+											style={{
+												borderColor: colorSelected.includes(color)
+													? color
+													: undefined,
+											}}>
+											<div
+												style={{
+													width: 20,
+													height: 20,
+													borderRadius: 2,
+													backgroundColor: color,
+												}}
+											/>
+											<Typography.Text style={{ color: color }}>
+												{color}
+											</Typography.Text>
+										</Button>
+									))}
+								</Space>
+							)}
+						</>
+
 						<Form.Item name='size' label='Sizes'>
 							<Select
 								options={selectDatas.sizes}
@@ -124,13 +175,15 @@ const FilterProduct = (props: Props) => {
 								placeholder='Size'
 							/>
 						</Form.Item>
-						<Form.Item name={'price'} label='Price'>
-							<Slider
-								range
-								min={Math.min(...selectDatas.prices)}
-								max={Math.max(...selectDatas.prices)}
-							/>
-						</Form.Item>
+						{selectDatas.prices && selectDatas.prices.length > 0 && (
+							<Form.Item name={'price'} label='Price'>
+								<Slider
+									range
+									min={Math.min(...selectDatas.prices)}
+									max={Math.max(...selectDatas.prices)}
+								/>
+							</Form.Item>
+						)}
 					</Form>
 
 					<div className='mt-4 text-right'>

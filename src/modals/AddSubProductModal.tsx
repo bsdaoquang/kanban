@@ -45,15 +45,6 @@ const AddSubProductModal = (props: Props) => {
 				data[i] = values[i] ?? '';
 			}
 			data.productId = product._id;
-			if (fileList.length > 0) {
-				const urls: string[] = [];
-				fileList.forEach(async (file) => {
-					const url = await uploadFile(file.originFileObj);
-					url && urls.push(url);
-				});
-
-				data.images = urls;
-			}
 
 			if (data.color) {
 				data.color =
@@ -66,7 +57,7 @@ const AddSubProductModal = (props: Props) => {
 			const api = `/products/add-sub-product`;
 			try {
 				const res = await handleAPI(api, data, 'post');
-
+				await uploadFileForId(res.data._id);
 				onAddNew(res.data);
 				handleCancel();
 			} catch (error) {
@@ -76,6 +67,28 @@ const AddSubProductModal = (props: Props) => {
 			}
 		} else {
 			message.error('Need to product detail');
+		}
+	};
+
+	const uploadFileForId = async (subId: string) => {
+		try {
+			if (fileList.length > 0) {
+				const urls: string[] = [];
+				fileList.forEach(async (file) => {
+					const url = await uploadFile(file.originFileObj);
+					url && urls.push(url);
+
+					if (urls.length === fileList.length) {
+						await handleAPI(
+							`/products/update-sub-product?id=${subId}`,
+							{ images: urls },
+							'put'
+						);
+					}
+				});
+			}
+		} catch (error) {
+			console.log(error);
 		}
 	};
 

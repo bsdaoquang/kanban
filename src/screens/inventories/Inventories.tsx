@@ -44,6 +44,7 @@ const Inventories = () => {
 	const [pageSize, setPageSize] = useState(10);
 	const [total, setTotal] = useState<number>(10);
 	const [searchKey, setSearchKey] = useState('');
+	const [isFilting, setIsFilting] = useState(false);
 
 	const navigate = useNavigate();
 
@@ -64,6 +65,7 @@ const Inventories = () => {
 			const res = await handleAPI(api);
 			const data = res.data;
 			setProducts(data.items.map((item: any) => ({ ...item, key: item._id })));
+
 			setTotal(data.totalItems);
 		} catch (error) {
 			console.log(error);
@@ -147,7 +149,7 @@ const Inventories = () => {
 			dataIndex: 'categories',
 			title: 'categories',
 			render: (ids: string[]) => (
-				<Space>
+				<Space key={'categories-nd'}>
 					{ids.map((id) => (
 						<CategoryComponent id={id} />
 					))}
@@ -314,8 +316,12 @@ const Inventories = () => {
 
 	const handleFilterProducts = async (vals: FilterProductValue) => {
 		const api = `/products/filter-products`;
+		setIsFilting(true);
 		try {
+			// console.log(vals);
 			const res = await handleAPI(api, vals, 'post');
+			setTotal(res.data.totalItems);
+			setProducts(res.data.items);
 		} catch (error) {
 			console.log(error);
 		}
@@ -366,6 +372,18 @@ const Inventories = () => {
 
 				<div className='col text-right'>
 					<Space>
+						{isFilting && (
+							<Button
+								onClick={async () => {
+									setPage(1);
+									await getProducts(
+										`/products?page=${page}&pageSize=${pageSize}`
+									);
+									setIsFilting(false);
+								}}>
+								Clear filter values
+							</Button>
+						)}
 						<Input.Search
 							value={searchKey}
 							onChange={(val) => setSearchKey(val.target.value)}

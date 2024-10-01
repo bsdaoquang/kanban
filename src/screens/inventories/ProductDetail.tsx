@@ -1,55 +1,190 @@
 /** @format */
 
-import { Button } from 'antd';
-import axios from 'axios';
-import { replaceName } from '../../utils/replaceName';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import handleAPI from '../../apis/handleAPI';
+import { ProductModel, SubProductModel } from '../../models/Products';
+import {
+	Empty,
+	Space,
+	Spin,
+	Typography,
+	Table,
+	Avatar,
+	Tag,
+	Button,
+	Modal,
+	message,
+} from 'antd';
+import { ColumnProps } from 'antd/es/table';
+import { Edit2, Trash } from 'iconsax-react';
+import { VND } from '../../utils/handleCurrency';
+import { colors } from '../../constants/colors';
+import { AddSubProductModal } from '../../modals';
 
 const ProductDetail = () => {
 	const [isLoading, setIsLoading] = useState(false);
+	const [productDetail, setProductDetail] = useState<ProductModel>();
+	const [subProducts, setSubProducts] = useState<SubProductModel[]>([]);
+	const [productSelected, setProductSelected] = useState<ProductModel>();
+	const [isVisibleAddSubProduct, setIsVisibleAddSubProduct] = useState(false);
 
-	const handleFakeProduct = async () => {
-		const api = `https://fakestoreapi.com/products`;
+	const [searchParams] = useSearchParams();
+
+	const id = searchParams.get('id');
+
+	useEffect(() => {
+		if (id) {
+			getProductDetail();
+		}
+	}, [id]);
+
+	useEffect(() => {
+		setProductSelected(productDetail);
+	}, [productDetail]);
+
+	const getProductDetail = async () => {
+		const api = `/products/detail?id=${id}`;
+
 		setIsLoading(true);
 		try {
-			const res = await axios(api);
-
-			if (res.status === 200 && res.data) {
-				const data = res.data;
-
-				data.forEach(async (item: any) => await handleAddDemoData(item));
-			}
+			const res = await handleAPI(api);
+			setProductDetail(res.data.product);
+			setSubProducts(res.data.subProducts);
 		} catch (error) {
 			console.log(error);
 		} finally {
 			setIsLoading(false);
-			console.log('Done');
 		}
 	};
 
-	const handleAddDemoData = async (item: any) => {
-		const api = `/products/add-new`;
+	const handleRemoveSubProduct = async (id: string) => {
+		const api = `/products/remove-sub-product?id=${id}&isSoftDelete=true`;
 
-		const data = {
-			title: item.title,
-			slug: replaceName(item.title),
-			description: item.description,
-			images: [item.image],
-			categories: ['66f3c241d77ff9a6b618ceb5'],
-			supplier: '66d47670a6d4f4e9f09d12aa',
-		};
+		try {
+			await handleAPI(api, undefined, 'delete');
+			message.success('sub product removed!!!');
 
-		await handleAPI(api, data, 'post');
-		console.log('Added product!!');
+			// update state
+			const items = [...subProducts];
+			const index = items.findIndex((element) => element._id === id);
+
+			if (index - 1) {
+				items.splice(index, 1);
+			}
+
+			setSubProducts(items);
+
+			// call api again
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
-	return (
-		<div>
-			<Button loading={isLoading} onClick={handleFakeProduct}>
-				Face Product
-			</Button>
+	const columns: ColumnProps<SubProductModel>[] = [
+		{
+			key: 'images',
+			dataIndex: 'images',
+			title: 'Images',
+			render: (imgs: string[]) => (
+				<Space>
+					{imgs.length > 0 && imgs.map((img) => <Avatar src={img} size={40} />)}
+				</Space>
+			),
+		},
+		{
+			title: 'Size',
+			key: 'size',
+			dataIndex: 'size',
+			render: (size: string) => <Tag>{size}</Tag>,
+			align: 'center',
+		},
+		{
+			title: 'Color',
+			key: 'color',
+			dataIndex: 'color',
+			render: (color: string) => <Tag color={color}>{color}</Tag>,
+			align: 'center',
+		},
+		{
+			key: 'price',
+			title: 'Price',
+			dataIndex: 'price',
+			render: (price: number) => VND.format(price),
+			align: 'right',
+		},
+		{
+			key: 'stock',
+			title: 'stock',
+			dataIndex: 'qty',
+			render: (qty: number) => qty.toLocaleString(),
+			align: 'right',
+		},
+		{
+			key: 'actions',
+			dataIndex: '',
+			render: (item: SubProductModel) => (
+				<Space>
+					<Button
+						type='text'
+						icon={<Edit2 variant='Bold' color={colors.primary500} size={18} />}
+					/>
+					<Button
+						onClick={() =>
+							Modal.confirm({
+								title: 'Confirm',
+								content:
+									'Are you sure you want to remove this sub product item?',
+								onOk: async () => await handleRemoveSubProduct(item._id),
+							})
+						}
+						type='text'
+						danger
+						icon={<Trash variant='Bold' size={18} />}
+					/>
+				</Space>
+			),
+			align: 'right',
+			fixed: 'right',
+		},
+	];
+
+	return isLoading ? (
+		<Spin />
+	) : productDetail ? (
+		<div className='container'>
+			<div className='row'>
+				<div className='col'>
+					<Typography.Title level={3}>{productDetail?.title}</Typography.Title>
+				</div>
+				<div className='col text-right'>
+					<Button
+						onClick={() => setIsVisibleAddSubProduct(true)}
+						type='primary'>
+						Add sub product
+					</Button>
+				</div>
+			</div>
+			<div className='mt-4'>
+				<Table columns={columns} dataSource={subProducts} />
+			</div>
+			{productDetail && (
+				<AddSubProductModal
+					product={productSelected}
+					visible={isVisibleAddSubProduct}
+					onClose={() => {
+						setProductSelected(undefined);
+						setIsVisibleAddSubProduct(false);
+					}}
+					onAddNew={async (val) => {
+						await getProductDetail();
+						// setSubProducts([...subProducts, val]);
+					}}
+				/>
+			)}
 		</div>
+	) : (
+		<Empty description='Data not found!!!' />
 	);
 };
 
