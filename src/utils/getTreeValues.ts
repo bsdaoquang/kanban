@@ -12,16 +12,17 @@ export const getTreeValues = (data: any[], isSelect?: boolean) => {
 			: { ...item, key: item._id }
 	);
 
-	newItems.forEach((item) =>
+	newItems.forEach((item) => {
+		const children = changeMenu(
+			data,
+			isSelect ? item.value : item._id,
+			isSelect ?? false
+		);
 		values.push({
 			...item,
-			children: changeMenu(
-				data,
-				isSelect ? item.value : item._id,
-				isSelect ?? false
-			),
-		})
-	);
+			children,
+		});
+	});
 
 	return values;
 };
