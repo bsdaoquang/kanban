@@ -76,3 +76,7 @@ a{
 -moz-box-shadow: 0px 9px 29px -17px rgba(66, 68, 90, 1);
 box-shadow: 0px 9px 29px -17px rgba(66, 68, 90, 1);
 }
+
+.ant-menu-item-selected::after{
+  border-bottom-width: 0px
+}

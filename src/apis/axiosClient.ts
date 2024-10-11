@@ -4,7 +4,7 @@ import axios from 'axios';
 import queryString from 'query-string';
 import { localDataNames } from '../constants/appInfos';
 
-const baseURL = `http://192.168.1.9:3001`;
+const baseURL = `http://192.168.1.10:3001`;
 const baseURLProduction = `https://server-kanban.onrender.com`;
 
 const getAssetToken = () => {
