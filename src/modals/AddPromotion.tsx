@@ -4,49 +4,115 @@ import {
 	DatePicker,
 	Form,
 	Input,
+	message,
 	Modal,
 	Select,
 	Upload,
-	UploadFile,
+	UploadProps,
 } from 'antd';
 import { useState } from 'react';
+import handleAPI from '../apis/handleAPI';
+import { uploadFile } from '../utils/uploadFile';
 
 interface Props {
 	visible: boolean;
 	onClose: () => void;
 	promotion?: any;
+	onAddNew: (val: any) => void;
 }
 
 const AddPromotion = (props: Props) => {
-	const { visible, onClose, promotion } = props;
+	const { visible, onClose, promotion, onAddNew } = props;
 
-	const [imageUpload, setImageUpload] = useState<UploadFile[]>([]);
+	const [imageUpload, setImageUpload] = useState<any[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const [form] = Form.useForm();
 
 	const handleClose = () => {
+		form.resetFields();
 		onClose();
 	};
 
-	const handleAddNewPromotion = async (values: any) => {};
+	const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+		const items = newFileList.map((item) =>
+			item.originFileObj
+				? {
+						...item,
+						url: item.originFileObj
+							? URL.createObjectURL(item.originFileObj)
+							: '',
+						status: 'done',
+				  }
+				: { ...item }
+		);
+
+		setImageUpload(items);
+	};
+
+	const handleAddNewPromotion = async (values: any) => {
+		if (imageUpload.length === 0) {
+			message.error('Please upload one image');
+		} else {
+			const start = values.startAt;
+			const end = values.endAt;
+
+			if (new Date(end).getTime() < new Date(start).getTime()) {
+				message.error('Thời gian kết thúc phải lớn thời gian bắt đầu');
+			} else {
+				const data: any = {};
+
+				for (const i in values) {
+					data[i] = values[i] ?? '';
+				}
+
+				data.startAt = new Date(start);
+				data.endAt = new Date(end);
+
+				data.imageURL =
+					imageUpload.length > 0 && imageUpload[0].originFileObj
+						? await uploadFile(imageUpload[0].originFileObj)
+						: '';
+
+				const api = `/promotions/add-new`;
+				setIsLoading(true);
+
+				try {
+					const res = await handleAPI(api, data, 'post');
+					onAddNew(res.data);
+					handleClose();
+				} catch (error) {
+					console.log(error);
+				} finally {
+					setIsLoading(false);
+				}
+			}
+		}
+	};
 	return (
 		<Modal
 			title='Add new promotion/discount'
 			open={visible}
 			onClose={handleClose}
 			onCancel={handleClose}
+			okButtonProps={{
+				loading: isLoading,
+			}}
+			cancelButtonProps={{
+				loading: isLoading,
+			}}
 			onOk={() => form.submit()}>
 			<Upload
+				accept='image/*'
 				fileList={imageUpload}
 				listType='picture-card'
 				className='mb-3'
-				onChange={(val) => {
-					console.log(val);
-				}}>
+				onChange={handleChange}>
 				{imageUpload.length === 0 ? 'Upload' : null}
 			</Upload>
 			<Form
 				form={form}
+				disabled={isLoading}
 				size='large'
 				onFinish={handleAddNewPromotion}
 				layout='vertical'>

@@ -28,6 +28,8 @@ const ProductDetail = () => {
 	const [subProducts, setSubProducts] = useState<SubProductModel[]>([]);
 	const [productSelected, setProductSelected] = useState<ProductModel>();
 	const [isVisibleAddSubProduct, setIsVisibleAddSubProduct] = useState(false);
+	const [subProductSelected, setSubProductSelected] =
+		useState<SubProductModel>();
 
 	const [searchParams] = useSearchParams();
 
@@ -114,6 +116,13 @@ const ProductDetail = () => {
 			align: 'right',
 		},
 		{
+			key: 'discount',
+			title: 'Discount',
+			dataIndex: 'discount',
+			render: (discount: number) => (discount ? VND.format(discount) : null),
+			align: 'right',
+		},
+		{
 			key: 'stock',
 			title: 'stock',
 			dataIndex: 'qty',
@@ -127,6 +136,10 @@ const ProductDetail = () => {
 				<Space>
 					<Button
 						type='text'
+						onClick={() => {
+							setSubProductSelected(item);
+							setIsVisibleAddSubProduct(true);
+						}}
 						icon={<Edit2 variant='Bold' color={colors.primary500} size={18} />}
 					/>
 					<Button
@@ -176,6 +189,7 @@ const ProductDetail = () => {
 						setProductSelected(undefined);
 						setIsVisibleAddSubProduct(false);
 					}}
+					subProduct={subProductSelected}
 					onAddNew={async (val) => {
 						await getProductDetail();
 						// setSubProducts([...subProducts, val]);

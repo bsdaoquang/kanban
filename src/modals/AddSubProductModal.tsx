@@ -23,10 +23,11 @@ interface Props {
 	onClose: () => void;
 	product?: ProductModel;
 	onAddNew: (val: SubProductModel) => void;
+	subProduct?: SubProductModel;
 }
 
 const AddSubProductModal = (props: Props) => {
-	const { visible, onClose, product, onAddNew } = props;
+	const { visible, onClose, product, onAddNew, subProduct } = props;
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [fileList, setFileList] = useState<any[]>([]);
@@ -37,6 +38,20 @@ const AddSubProductModal = (props: Props) => {
 	useEffect(() => {
 		form.setFieldValue('color', colors.primary500);
 	}, []);
+
+	useEffect(() => {
+		if (subProduct) {
+			form.setFieldsValue(subProduct);
+
+			if (subProduct.images && subProduct.images.length > 0) {
+				const items = subProduct.images.map((item) => ({
+					url: item,
+				}));
+
+				setFileList(items);
+			}
+		}
+	}, [subProduct]);
 
 	const handleAddSubproduct = async (values: any) => {
 		if (product) {
@@ -54,10 +69,13 @@ const AddSubProductModal = (props: Props) => {
 			}
 
 			setIsLoading(true);
-			const api = `/products/add-sub-product`;
+			const api = `/products/${
+				subProduct
+					? `update-sub-product?id=${subProduct._id}`
+					: 'add-sub-product'
+			}`;
 			try {
-				const res = await handleAPI(api, data, 'post');
-				await uploadFileForId(res.data._id);
+				const res = await handleAPI(api, data, subProduct ? 'put' : 'post');
 				onAddNew(res.data);
 				handleCancel();
 			} catch (error) {
@@ -160,6 +178,11 @@ const AddSubProductModal = (props: Props) => {
 					</div>
 					<div className='col'>
 						<Form.Item name={'price'} label='Price'>
+							<InputNumber style={{ width: '100%' }} />
+						</Form.Item>
+					</div>
+					<div className='col'>
+						<Form.Item name={'discount'} label='Discount'>
 							<InputNumber style={{ width: '100%' }} />
 						</Form.Item>
 					</div>

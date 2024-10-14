@@ -150,7 +150,7 @@ const Inventories = () => {
 			dataIndex: 'categories',
 			title: 'categories',
 			render: (ids: string[]) => (
-				<Space key={'categories-nd'}>
+				<Space key={'categories-nd'} wrap>
 					{ids.map((id) => (
 						<CategoryComponent id={id} />
 					))}
