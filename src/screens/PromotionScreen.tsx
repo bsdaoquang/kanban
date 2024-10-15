@@ -1,33 +1,25 @@
 /** @format */
 
-import { Badge, Button, List, Spin } from 'antd';
+import { ColumnProps } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 import handleAPI from '../apis/handleAPI';
 import { AddPromotion } from '../modals';
 import { PromotionModel } from '../models/PromotionModel';
-import { Card, CardTick } from 'iconsax-react';
+import { Avatar, Button, Image, Modal, Space, Table } from 'antd';
+import { Edit2, Trash } from 'iconsax-react';
+
+const { confirm } = Modal;
 
 const PromotionScreen = () => {
 	const [isVisibleModalAddPromotion, setIsVisibleModalAddPromotion] =
 		useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [promotions, setPromotions] = useState<PromotionModel[]>([]);
-	const [cards, setCards] = useState<any[]>([]);
-	const [myCarts, setMyCarts] = useState<any[]>([]);
-	const [auth, setAuth] = useState('');
+	const [promotionSelected, setPromotionSelected] = useState<PromotionModel>();
 
 	useEffect(() => {
 		getPromotions();
 	}, []);
-
-	useEffect(() => {
-		const items = cards.filter((element) => element.uid === auth);
-
-		console.log(auth);
-		console.log(items);
-
-		setMyCarts(items);
-	}, [auth]);
 
 	const getPromotions = async () => {
 		const api = `/promotions/`;
@@ -42,50 +34,95 @@ const PromotionScreen = () => {
 		}
 	};
 
-	const testAddTocard = () => {
-		const data = promotions[0];
+	const handleRemovePromotion = async (id: string) => {
+		const api = `/promotions/remove?id=${id}`;
 
-		const items: any = [];
-
-		Array.from({ length: 110 }).map((item) => {
-			items.push({
-				...data,
-				uid: `user${Math.floor(Math.random() * 2)}`,
-			});
-		});
-
-		setCards(items);
+		try {
+			await handleAPI(api, undefined, 'delete');
+			await getPromotions();
+		} catch (error) {
+			console.log(error);
+		}
 	};
+
+	const columns: ColumnProps<PromotionModel>[] = [
+		{
+			key: 'image',
+			dataIndex: 'imageURL',
+			title: 'Image',
+			render: (img: string) => <Avatar src={img} size={50} />,
+		},
+		{
+			key: 'title',
+			dataIndex: 'title',
+			title: 'Title',
+		},
+		{
+			key: 'description',
+			dataIndex: 'description',
+			title: 'Description',
+		},
+		{
+			key: 'code',
+			dataIndex: 'code',
+			title: 'Code',
+		},
+		{
+			key: 'available',
+			dataIndex: 'numOfAvailable',
+			title: 'Available',
+		},
+
+		{
+			key: 'value',
+			dataIndex: 'value',
+			title: 'Value',
+		},
+		{
+			key: 'type',
+			dataIndex: 'type',
+			title: 'Type',
+		},
+		{
+			key: 'btn',
+			dataIndex: '',
+			align: 'right',
+			fixed: 'right',
+			render: (item: PromotionModel) => (
+				<Space>
+					<Button
+						onClick={() => {
+							setPromotionSelected(item);
+							setIsVisibleModalAddPromotion(true);
+						}}
+						type='text'
+						icon={<Edit2 variant='Bold' size={20} className='text-info' />}
+					/>
+					<Button
+						onClick={() =>
+							confirm({
+								title: 'Confirm',
+								content: 'Are you sure you want to remove this promotion?',
+								onOk: () => handleRemovePromotion(item._id),
+							})
+						}
+						type='text'
+						icon={<Trash variant='Bold' size={20} className='text-danger' />}
+					/>
+				</Space>
+			),
+		},
+	];
 
 	return (
 		<div>
 			<div className='container'>
-				<div className='mb-3'>
-					<Badge count={myCarts.length}>
-						<CardTick />
-					</Badge>
-				</div>
-				{Array.from({ length: 3 }).map((item, index) => (
-					<Button onClick={() => setAuth(`user${index}`)}>User{index}</Button>
-				))}
-				<Button onClick={testAddTocard}>Test</Button>
-				<div className='row'>
-					<div className='col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3'>
-						<List
-							dataSource={promotions}
-							loading={isLoading}
-							renderItem={(item) => (
-								<List.Item key={item._id}>
-									<List.Item.Meta title={item.title} />
-								</List.Item>
-							)}
-						/>
-					</div>
-				</div>
+				<Table loading={isLoading} columns={columns} dataSource={promotions} />
 			</div>
 
 			<AddPromotion
-				onAddNew={(val) => console.log(val)}
+				promotion={promotionSelected}
+				onAddNew={async (val) => await getPromotions()}
 				visible={isVisibleModalAddPromotion}
 				onClose={() => setIsVisibleModalAddPromotion(false)}
 			/>
