@@ -3,7 +3,6 @@
 import {
 	Avatar,
 	Button,
-	Card,
 	Divider,
 	Dropdown,
 	Input,
@@ -21,14 +20,13 @@ import React, { useEffect, useState } from 'react';
 import { MdLibraryAdd } from 'react-icons/md';
 import { Link, useNavigate } from 'react-router-dom';
 import handleAPI from '../../apis/handleAPI';
+import { FilterProduct } from '../../components';
 import CategoryComponent from '../../components/CategoryComponent';
+import { FilterProductValue } from '../../components/FilterProduct';
 import { colors } from '../../constants/colors';
 import { AddSubProductModal } from '../../modals';
 import { ProductModel, SubProductModel } from '../../models/Products';
 import { replaceName } from '../../utils/replaceName';
-import { FilterProduct } from '../../components';
-import { FilterProductValue } from '../../components/FilterProduct';
-import axios from 'axios';
 
 const { confirm } = Modal;
 
@@ -56,9 +54,13 @@ const Inventories = () => {
 		}
 	}, [searchKey]);
 
+	// useEffect(() => {
+	// 	getProducts(`/products?page=${page}&pageSize=${pageSize}`);
+	// }, [page, pageSize]);
+
 	useEffect(() => {
-		getProducts(`/products?page=${page}&pageSize=${pageSize}`);
-	}, [page, pageSize]);
+		getProducts(`/products`);
+	}, []);
 
 	const getProducts = async (api: string) => {
 		setIsLoading(true);
@@ -66,7 +68,6 @@ const Inventories = () => {
 			const res = await handleAPI(api);
 			const data = res.data;
 			setProducts(data.items.map((item: any) => ({ ...item, key: item._id })));
-
 			setTotal(data.totalItems);
 		} catch (error) {
 			console.log(error);
@@ -328,138 +329,8 @@ const Inventories = () => {
 		}
 	};
 
-	const democolors = [
-		'#131118',
-		'#5553E1',
-		'#A3D139',
-		'#E15353',
-		'#E1A053',
-		'#E1D353',
-	];
-	const sizes = ['S', 'M', 'X', 'XL', 'XXL', 'XXXL'];
-	const images = [
-		'https://images.pexels.com/photos/2584269/pexels-photo-2584269.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2681751/pexels-photo-2681751.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2752045/pexels-photo-2752045.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/1485031/pexels-photo-1485031.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/1631181/pexels-photo-1631181.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2010812/pexels-photo-2010812.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2233703/pexels-photo-2233703.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2065195/pexels-photo-2065195.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/3363204/pexels-photo-3363204.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/983497/pexels-photo-983497.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/3672825/pexels-photo-3672825.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/36029/aroni-arsa-children-little.jpg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2738792/pexels-photo-2738792.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2866077/pexels-photo-2866077.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2010925/pexels-photo-2010925.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/3054973/pexels-photo-3054973.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/2693849/pexels-photo-2693849.jpeg?auto=compress&cs=tinysrgb&w=600',
-		'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=600',
-	];
-
-	const cats = [
-		'66fd64d9909d3dbc02cdb0bd',
-		'66fd64d9909d3dbc02cdb0bf',
-		'66fd64d9909d3dbc02cdb0c1',
-		'66fd64d9909d3dbc02cdb0c3',
-		'66fd64d9909d3dbc02cdb0c9',
-		'66fd64d9909d3dbc02cdb0cb',
-		'66fd64d9909d3dbc02cdb0cd',
-		'66fd64d9909d3dbc02cdb0cf',
-		'66fd64d9909d3dbc02cdb0d5',
-		'66fd64d9909d3dbc02cdb0d7',
-		'66fd64d9909d3dbc02cdb0db',
-		'66fd64d9909d3dbc02cdb0d9',
-		'66fd64d9909d3dbc02cdb0dd',
-		'66fd64d9909d3dbc02cdb0e4',
-		'66fd64d9909d3dbc02cdb0e6',
-		'66fd64d9909d3dbc02cdb0ea',
-		'66fd64d9909d3dbc02cdb0e8',
-		'66fd64d9909d3dbc02cdb0ec',
-		'66fd64d9909d3dbc02cdb0f3',
-		'66fd64d9909d3dbc02cdb0f5',
-		'66fd64d9909d3dbc02cdb0f7',
-		'66fd64d9909d3dbc02cdb0f9',
-		'66fd64d9909d3dbc02cdb0fb',
-		'66fd64da909d3dbc02cdb102',
-		'66fd64da909d3dbc02cdb104',
-		'66fd64da909d3dbc02cdb106',
-		'66fd64da909d3dbc02cdb108',
-		'66fd64da909d3dbc02cdb10c',
-		'66fd64da909d3dbc02cdb10a',
-		'66fd64da909d3dbc02cdb113',
-		'66fd64da909d3dbc02cdb116',
-		'66fd64da909d3dbc02cdb118',
-		'66fd64da909d3dbc02cdb11a',
-		'66fd64da909d3dbc02cdb11c',
-		'66fd64da909d3dbc02cdb11e',
-		'66fd64da909d3dbc02cdb126',
-		'66fd64da909d3dbc02cdb128',
-		'66fd64da909d3dbc02cdb12a',
-		'66fd64da909d3dbc02cdb12c',
-		'66fd64da909d3dbc02cdb12e',
-		'66fd64da909d3dbc02cdb130',
-		'66fd64da909d3dbc02cdb133',
-	];
-	const handleAddDemoProduct = () => {
-		Array.from({ length: 500 }).forEach(async (_item) => {
-			const catNums = Math.floor(Math.random() * cats.length);
-
-			const categories: string[] = [];
-			Array.from({ length: cats.length }).forEach(
-				(num) => categories.length < 3 && categories.push(cats[catNums])
-			);
-
-			const data = {
-				title: 'Demo title Lorem ipsum dolor sit.',
-				slug: replaceName(`Demo title Lorem ipsum dolor sit.`),
-				description:
-					'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Illum cupiditate, repellendus aperiam provident ex accusantium numquam aliquid eligendi odit ea omnis iste quisquam, quos suscipit, tenetur expedita nihil similique impedit!',
-				categories,
-				supplier: 'YK Disney',
-				content: '',
-				images: [images[Math.floor(Math.random() * images.length)]],
-			};
-
-			try {
-				const res = await handleAPI(`/products/add-new`, data, 'post');
-				console.log('Add product done');
-				if (res.data) {
-					await handleAddSubProduct(res.data._id);
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		});
-	};
-
-	const handleAddSubProduct = async (id: string) => {
-		Array.from({ length: 5 }).forEach(async () => {
-			const data = {
-				productId: id,
-				size: sizes[Math.floor(Math.random() * sizes.length)],
-				color: democolors[Math.floor(Math.random() * democolors.length)],
-				price: Math.floor(Math.random() * 1000),
-				qty: Math.floor(Math.random() * 100),
-
-				images: [images[Math.floor(Math.random() * images.length)]],
-			};
-
-			try {
-				const res = await handleAPI('/products/add-sub-product', data, 'post');
-				console.log('Add sub product done');
-			} catch (error) {
-				console.log(error);
-			}
-		});
-	};
-
 	return (
 		<div>
-			<Button onClick={handleAddDemoProduct}>Add Demo Product</Button>
 			<div className='row'>
 				<div className='col'>
 					<Typography.Title level={4}>Product</Typography.Title>

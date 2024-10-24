@@ -56,6 +56,7 @@ const AddSubProductModal = (props: Props) => {
 	const handleAddSubproduct = async (values: any) => {
 		if (product) {
 			const data: any = {};
+
 			for (const i in values) {
 				data[i] = values[i] ?? '';
 			}
@@ -67,29 +68,8 @@ const AddSubProductModal = (props: Props) => {
 						? data.color
 						: data.color.toHexString();
 			}
-
 			setIsLoading(true);
-			const api = `/products/${
-				subProduct
-					? `update-sub-product?id=${subProduct._id}`
-					: 'add-sub-product'
-			}`;
-			try {
-				const res = await handleAPI(api, data, subProduct ? 'put' : 'post');
-				onAddNew(res.data);
-				handleCancel();
-			} catch (error) {
-				console.log(error);
-			} finally {
-				setIsLoading(false);
-			}
-		} else {
-			message.error('Need to product detail');
-		}
-	};
 
-	const uploadFileForId = async (subId: string) => {
-		try {
 			if (fileList.length > 0) {
 				const urls: string[] = [];
 				fileList.forEach(async (file) => {
@@ -97,16 +77,32 @@ const AddSubProductModal = (props: Props) => {
 					url && urls.push(url);
 
 					if (urls.length === fileList.length) {
-						await handleAPI(
-							`/products/update-sub-product?id=${subId}`,
-							{ images: urls },
-							'put'
-						);
+						data.images = urls;
+
+						await createSubProduct(data);
 					}
 				});
+			} else {
+				await createSubProduct(data);
 			}
+		} else {
+			message.error('Need to product detail');
+		}
+	};
+
+	const createSubProduct = async (data: any) => {
+		const api = `/products/${
+			subProduct ? `update-sub-product?id=${subProduct._id}` : 'add-sub-product'
+		}`;
+
+		try {
+			const res = await handleAPI(api, data, subProduct ? 'put' : 'post');
+			onAddNew(res.data);
+			handleCancel();
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
