@@ -11,7 +11,7 @@ export const uploadFile = async (file: any) => {
 
 	const filename = replaceName(newFile.name);
 
-	const storageRef = ref(storage, `images/${filename}-${Date.now()}`);
+	const storageRef = ref(storage, `images/${filename}`);
 
 	const res = await uploadBytes(storageRef, newFile);
 
