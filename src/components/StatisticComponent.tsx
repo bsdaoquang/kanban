@@ -1,84 +1,76 @@
 /** @format */
 
-import { Card, Space, Typography } from 'antd';
-import { ReactNode } from 'react';
-import { colors } from '../constants/colors';
-import { StatisticModel } from '../models/StatictisModel';
-import { FormatCurrency } from '../utils/formatNumber';
+import { Typography } from 'antd';
 
 interface Props {
+	value: string;
 	title: string;
-	datas: StatisticModel[];
+	color?: string;
+	type?: 'vertical' | 'horizontal';
+	image?: string;
 }
 
-const { Title, Text } = Typography;
-
-const renderDescriptionData = (item: StatisticModel) => (
-	<>
-		<Title
-			style={{ fontWeight: 600 }}
-			type='secondary'
-			className='m-0'
-			level={5}>
-			{item.valueType === 'number'
-				? item.value.toLocaleString()
-				: FormatCurrency.VND.format(item.value)}
-		</Title>
-		<Text style={{ fontWeight: 500 }} type='secondary'>
-			{item.description}
-		</Text>
-	</>
-);
-
 const StatisticComponent = (props: Props) => {
-	const { title, datas } = props;
+	const { value, title, color, type, image } = props;
+
 	return (
-		<Card className='mt-2 mb-4'>
-			<Title style={{ color: colors.gray600, fontWeight: '500', fontSize: 20 }}>
-				{title}
-			</Title>
-			<div className='row mt-3'>
-				{datas.map((item, index) => (
-					<div
-						className='col'
-						key={item.key}
+		<div className='col text-center'>
+			<div className='d-flex justify-content-center align-items-center mb-3'>
+				<div
+					style={{
+						width: 50,
+						height: 50,
+						backgroundColor: `${color ?? '#339AF0'}1a`,
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						borderRadius: 8,
+					}}>
+					<img
 						style={{
-							borderRight: `${
-								index < datas.length - 1 ? 1 : 0
-							}px solid #e0e0e0 `,
-						}}>
-						<div
-							className='mb-3'
-							style={{
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}>
-							<div>
-								<div
-									className='icon-wapper'
-									style={{
-										backgroundColor: item.color,
-									}}>
-									{item.icon}
-								</div>
-							</div>
-						</div>
-						{!item.type || item.type === 'horizontal' ? (
-							<Space
-								style={{
-									justifyContent: 'space-between',
-									display: 'flex',
-								}}>
-								{renderDescriptionData(item)}
-							</Space>
-						) : (
-							<div className='text-center'>{renderDescriptionData(item)}</div>
-						)}
-					</div>
-				))}
+							width: '60%',
+							height: 'auto',
+							borderRadius: 2,
+						}}
+						src={image ?? './access/icons8-sales-32.png'}
+						alt=''
+					/>
+				</div>
 			</div>
-		</Card>
+			<div
+				className={''}
+				style={{
+					width: '100%',
+				}}>
+				<div
+					className={
+						!type || type !== 'vertical'
+							? 'd-flex justify-content-between align-items-center'
+							: 'd-grid justify-content-center align-items-center'
+					}>
+					<Typography.Paragraph
+						className='mb-0'
+						type='secondary'
+						style={{
+							fontSize: '1.1rem',
+							fontWeight: '500',
+						}}>
+						{value}
+					</Typography.Paragraph>
+					<div>
+						<Typography.Paragraph
+							className='m-0'
+							ellipsis
+							type='secondary'
+							style={{
+								fontSize: '0.9rem',
+							}}>
+							{title}
+						</Typography.Paragraph>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 };
 

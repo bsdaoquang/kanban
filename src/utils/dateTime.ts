@@ -11,4 +11,11 @@ export class DateTime {
 			date.getMonth() + 1
 		)}-${add0toNumber(date.getDate())}`;
 	};
+
+	static getShortDate = (val: any) => {
+		const date = new Date(val);
+		return `${add0toNumber(date.getDate())}/${add0toNumber(
+			date.getMonth() + 1
+		)}`;
+	};
 }

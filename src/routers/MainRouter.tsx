@@ -16,7 +16,30 @@ import AddProduct from '../screens/inventories/AddProduct';
 import Categories from '../screens/categories/Categories';
 import CategoryDetail from '../screens/categories/CategoryDetail';
 import PromotionScreen from '../screens/PromotionScreen';
+import AddOrder from '../screens/orther/AddOrder';
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
+	PointElement,
+	LineElement,
+} from 'chart.js';
 
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend
+);
 const { Content, Footer, Header, Sider } = Layout;
 
 const MainRouter = () => {
@@ -46,7 +69,10 @@ const MainRouter = () => {
 							</Route>
 							<Route path='/report' element={<ReportScreen />} />
 							<Route path='/suppliers' element={<Suppliers />} />
-							<Route path='/orders' element={<Orders />} />
+							<Route path='/orders'>
+								<Route index element={<Orders />} />
+								<Route path='/orders/add-new' element={<AddOrder />} />
+							</Route>
 							<Route>
 								<Route path='/categories' element={<Categories />} />
 								<Route

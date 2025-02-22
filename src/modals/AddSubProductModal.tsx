@@ -8,6 +8,7 @@ import {
 	InputNumber,
 	message,
 	Modal,
+	Select,
 	Typography,
 	Upload,
 	UploadProps,
@@ -17,6 +18,10 @@ import handleAPI from '../apis/handleAPI';
 import { colors } from '../constants/colors';
 import { ProductModel, SubProductModel } from '../models/Products';
 import { uploadFile } from '../utils/uploadFile';
+import { useSelector } from 'react-redux';
+import { authSeletor } from '../redux/reducers/authReducer';
+import { SelectModel } from '../models/FormModel';
+import { get } from 'http';
 
 interface Props {
 	visible: boolean;
@@ -33,11 +38,20 @@ const AddSubProductModal = (props: Props) => {
 	const [fileList, setFileList] = useState<any[]>([]);
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const [previewImage, setPreviewImage] = useState('');
+	const [options, setOptions] = useState<SelectModel[]>();
 	const [form] = Form.useForm();
+
+	const auth = useSelector(authSeletor);
 
 	useEffect(() => {
 		form.setFieldValue('color', colors.primary500);
 	}, []);
+
+	useEffect(() => {
+		if (!product) {
+			getProductOptions();
+		}
+	}, [product]);
 
 	useEffect(() => {
 		if (subProduct) {
@@ -54,39 +68,45 @@ const AddSubProductModal = (props: Props) => {
 	}, [subProduct]);
 
 	const handleAddSubproduct = async (values: any) => {
-		if (product) {
-			const data: any = {};
+		const data: any = {};
 
-			for (const i in values) {
-				data[i] = values[i] ?? '';
-			}
-			data.productId = product._id;
+		for (const i in values) {
+			data[i] = values[i] ?? '';
+		}
+		data.productId = product ? product._id : values.productId;
 
+		if (!data.productId) {
+			message.error('Please select product');
+			return;
+		} else {
 			if (data.color) {
 				data.color =
 					typeof data.color === 'string'
 						? data.color
 						: data.color.toHexString();
 			}
-			setIsLoading(true);
 
 			if (fileList.length > 0) {
-				const urls: string[] = [];
-				fileList.forEach(async (file) => {
+				const promises = fileList.map(async (file) => {
 					const url = await uploadFile(file.originFileObj);
-					url && urls.push(url);
-
-					if (urls.length === fileList.length) {
-						data.images = urls;
-
-						await createSubProduct(data);
-					}
+					return url;
 				});
+
+				const urls = await Promise.all(promises);
+
+				data.images = urls;
+			}
+
+			if (!product) {
+				onAddNew({
+					...data,
+					product: options?.find((item) => item.value === data.productId),
+				});
+				handleCancel();
 			} else {
+				setIsLoading(true);
 				await createSubProduct(data);
 			}
-		} else {
-			message.error('Need to product detail');
 		}
 	};
 
@@ -97,6 +117,7 @@ const AddSubProductModal = (props: Props) => {
 
 		try {
 			const res = await handleAPI(api, data, subProduct ? 'put' : 'post');
+			// await handleAddOrder({ ...data, subProduct_id: res?.data._id });
 			onAddNew(res.data);
 			handleCancel();
 		} catch (error) {
@@ -127,6 +148,17 @@ const AddSubProductModal = (props: Props) => {
 		setFileList(items);
 	};
 
+	const getProductOptions = async () => {
+		const api = `/products/get-product-options`;
+
+		try {
+			const res = await handleAPI(api);
+			setOptions(res.data);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	return (
 		<Modal
 			title='Add Sub product'
@@ -144,15 +176,14 @@ const AddSubProductModal = (props: Props) => {
 				size='large'
 				form={form}
 				disabled={isLoading}>
-				<Form.Item name='color' label='Color'>
-					<ColorPicker
-						format='hex'
-						// onChange={(val) => {
-						// 	const color = typeof val === 'string' ? val : val.toHexString();
+				{!product && (
+					<Form.Item name={'productId'} label='Product'>
+						<Select allowClear options={options} showSearch />
+					</Form.Item>
+				)}
 
-						// 	console.log(color);
-						// }}
-					/>
+				<Form.Item name='color' label='Color'>
+					<ColorPicker format='hex' />
 				</Form.Item>
 				<Form.Item
 					rules={[
@@ -177,12 +208,16 @@ const AddSubProductModal = (props: Props) => {
 							<InputNumber style={{ width: '100%' }} />
 						</Form.Item>
 					</div>
+
 					<div className='col'>
-						<Form.Item name={'discount'} label='Discount'>
+						<Form.Item name={'cost'} label='Cost'>
 							<InputNumber style={{ width: '100%' }} />
 						</Form.Item>
 					</div>
 				</div>
+				<Form.Item name={'discount'} label='Discount'>
+					<InputNumber style={{ width: '100%' }} />
+				</Form.Item>
 			</Form>
 			<Upload
 				multiple

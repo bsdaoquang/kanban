@@ -21,11 +21,14 @@ import { MdLibraryAdd } from 'react-icons/md';
 import { Link, useNavigate } from 'react-router-dom';
 import handleAPI from '../../apis/handleAPI';
 import { FilterProduct } from '../../components';
-import CategoryComponent from '../../components/CategoryComponent';
 import { FilterProductValue } from '../../components/FilterProduct';
-import { colors } from '../../constants/colors';
+import { colors, listColors } from '../../constants/colors';
 import { AddSubProductModal } from '../../modals';
-import { ProductModel, SubProductModel } from '../../models/Products';
+import {
+	CategoyModel,
+	ProductModel,
+	SubProductModel,
+} from '../../models/Products';
 import { replaceName } from '../../utils/replaceName';
 
 const { confirm } = Modal;
@@ -53,14 +56,6 @@ const Inventories = () => {
 			getProducts(`/products?page=${page}&pageSize=${pageSize}`);
 		}
 	}, [searchKey]);
-
-	// useEffect(() => {
-	// 	getProducts(`/products?page=${page}&pageSize=${pageSize}`);
-	// }, [page, pageSize]);
-
-	useEffect(() => {
-		getProducts(`/products`);
-	}, []);
 
 	const getProducts = async (api: string) => {
 		setIsLoading(true);
@@ -94,11 +89,6 @@ const Inventories = () => {
 		const api = `/products/delete?id=${id}`;
 		try {
 			await handleAPI(api, undefined, 'delete');
-
-			// cach 1: gọi lại api để load lại dữ liệu
-			// await getProducts()
-
-			// Cách 2: xoá item ra khỏi mảng, set lại state
 			const items = [...products];
 			const index = items.findIndex((element) => element._id === id);
 
@@ -150,10 +140,18 @@ const Inventories = () => {
 			key: 'categories',
 			dataIndex: 'categories',
 			title: 'categories',
-			render: (ids: string[]) => (
+			render: (cats: CategoyModel[]) => (
 				<Space key={'categories-nd'} wrap>
-					{ids.map((id) => (
-						<CategoryComponent id={id} />
+					{cats.map((cat) => (
+						<Link to={`/inventory/categories/detail/${cat.slug}?id=${cat._id}`}>
+							<Tag
+								color={
+									listColors[Math.floor(Math.random() * listColors.length)]
+								}
+								key={cat._id}>
+								{cat.title}
+							</Tag>
+						</Link>
 					))}
 				</Space>
 			),
@@ -213,8 +211,8 @@ const Inventories = () => {
 			render: (items: SubProductModel[]) => (
 				<Space wrap>
 					{items.length > 0 &&
-						items.map((item) => (
-							<Tag key={`size${item.size}`}>{item.size}</Tag>
+						items.map((item, index) => (
+							<Tag key={`size${item.size}-${index}`}>{item.size}</Tag>
 						))}
 				</Space>
 			),
@@ -408,6 +406,7 @@ const Inventories = () => {
 				</div>
 			</div>
 			<Table
+				rowKey={(record) => record._id}
 				pagination={{
 					showSizeChanger: true,
 					onShowSizeChange: (current, size) => {
@@ -439,11 +438,7 @@ const Inventories = () => {
 					setProductSelected(undefined);
 					setIsVisibleAddSubProduct(false);
 				}}
-				onAddNew={async (val) => {
-					// cách 1: Thêm dữ liệu, không gọi lại api
-					// cách 2: gọi lại api
-					// await getProducts();
-				}}
+				onAddNew={async (val) => {}}
 			/>
 		</div>
 	);
