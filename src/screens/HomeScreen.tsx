@@ -3,7 +3,11 @@
 import { Card, Spin, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import handleAPI from '../apis/handleAPI';
-import { SalesAndPurchaseStatistic, StatisticComponent } from '../components';
+import {
+	SalesAndPurchaseStatistic,
+	StatisticComponent,
+	TopSellingAndLowQuantityStatictis,
+} from '../components';
 import { BillModel } from '../models/BillModel';
 import { VND } from '../utils/handleCurrency';
 
@@ -49,7 +53,7 @@ const HomeScreen = () => {
 			<Spin />
 		</div>
 	) : (
-		<div className='container'>
+		<div className='container py-5'>
 			<div className='row'>
 				<div className='col-sm-12 col-md-8'>
 					{statictisValues?.sales && statictisValues.sales.length > 0 && (
@@ -199,6 +203,7 @@ const HomeScreen = () => {
 			</div>
 
 			<SalesAndPurchaseStatistic />
+			<TopSellingAndLowQuantityStatictis />
 		</div>
 	);
 };

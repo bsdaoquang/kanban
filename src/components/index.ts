@@ -6,6 +6,7 @@ import HeaderComponent from './HeaderComponent';
 import SalesAndPurchaseStatistic from './SalesAndPurchaseStatistic';
 import SiderComponent from './SiderComponent';
 import StatisticComponent from './StatisticComponent';
+import TopSellingAndLowQuantityStatictis from './TopSellingAndLowQuantityStatictis';
 
 export {
 	HeaderComponent,
@@ -14,4 +15,5 @@ export {
 	StatisticComponent,
 	FilterProduct,
 	SalesAndPurchaseStatistic,
+	TopSellingAndLowQuantityStatictis,
 };
