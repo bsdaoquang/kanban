@@ -99,7 +99,7 @@ const TopSellingAndLowQuantityStatictis = () => {
 				<Card
 					loading={isLoading}
 					title='Low quantity stock'
-					extra={<Link to={``}>See all</Link>}>
+					extra={<Link to={`/inventory`}>See all</Link>}>
 					<List
 						dataSource={datas?.lowQuantity}
 						renderItem={(item) => (

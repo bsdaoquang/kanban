@@ -15,7 +15,7 @@ import { CiViewList } from 'react-icons/ci';
 import { MdOutlineInventory } from 'react-icons/md';
 import { appInfo } from '../constants/appInfos';
 import { colors } from '../constants/colors';
-import { FaTags } from 'react-icons/fa';
+import { FaHistory, FaTags } from 'react-icons/fa';
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -82,6 +82,11 @@ const SiderComponent = () => {
 			key: 'Promotions',
 			label: <Link to={'/promotions'}>Promotions</Link>,
 			icon: <PercentageSquare size={20} />,
+		},
+		{
+			key: 'histories',
+			label: <Link to={'/actions'}>Histories</Link>,
+			icon: <FaHistory size={20} className='text-muted' />,
 		},
 	];
 	return (

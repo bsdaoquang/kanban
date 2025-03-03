@@ -1,5 +1,6 @@
 /** @format */
 
+import Actions from './Actions';
 import Login from './auth/Login';
 import SignUp from './auth/SignUp';
 import Inventories from './inventories/Inventories';
@@ -18,4 +19,5 @@ export {
 	Orders,
 	Suppliers,
 	ProductDetail,
+	Actions,
 };
