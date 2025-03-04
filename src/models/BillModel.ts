@@ -34,3 +34,6 @@ export interface ShippingAddress {
 	address: string;
 	_id: string;
 }
+
+export const BillStatus = ['pending', 'shipping', 'success', 'cancel'];
+export const BillStatusColor = ['warning', 'processing', 'success', 'error'];

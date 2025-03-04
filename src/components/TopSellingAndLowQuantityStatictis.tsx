@@ -49,7 +49,7 @@ const TopSellingAndLowQuantityStatictis = () => {
 				<Card
 					loading={isLoading}
 					title='Top selling stock'
-					extra={<Link to={``}>See all</Link>}>
+					extra={<Link to={`/bills`}>See all</Link>}>
 					<Table
 						dataSource={datas?.topSelling}
 						size='small'

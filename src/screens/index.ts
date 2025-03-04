@@ -3,6 +3,7 @@
 import Actions from './Actions';
 import Login from './auth/Login';
 import SignUp from './auth/SignUp';
+import BillsScreen from './bills';
 import Inventories from './inventories/Inventories';
 import ProductDetail from './inventories/ProductDetail';
 import ManageStore from './ManageStore';
@@ -20,4 +21,5 @@ export {
 	Suppliers,
 	ProductDetail,
 	Actions,
+	BillsScreen,
 };

@@ -15,7 +15,7 @@ import { CiViewList } from 'react-icons/ci';
 import { MdOutlineInventory } from 'react-icons/md';
 import { appInfo } from '../constants/appInfos';
 import { colors } from '../constants/colors';
-import { FaHistory, FaTags } from 'react-icons/fa';
+import { FaHistory, FaMoneyBill, FaTags } from 'react-icons/fa';
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -57,6 +57,11 @@ const SiderComponent = () => {
 			key: 'Suppliers',
 			label: <Link to={'/suppliers'}>Suppliers</Link>,
 			icon: <ProfileCircle size={20} />,
+		},
+		{
+			key: 'Bills',
+			label: <Link to={'/bills'}>Bills</Link>,
+			icon: <FaMoneyBill size={20} className='text-success' />,
 		},
 		{
 			key: 'Orders',

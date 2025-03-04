@@ -5,6 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {
 	Actions,
+	BillsScreen,
 	Inventories,
 	ManageStore,
 	Orders,
@@ -85,6 +86,9 @@ const MainRouter = () => {
 							<Route path='/manage-store' element={<ManageStore />} />
 							<Route path='/promotions' element={<PromotionScreen />} />
 							<Route path='/actions' element={<Actions />} />
+							<Route path='bills'>
+								<Route element={<BillsScreen />} index />
+							</Route>
 						</Routes>
 					</Content>
 					<Footer className='bg-white' />
